@@ -9,6 +9,7 @@ tc_ocr_scraper.py is the tc scraper
 
 
 libraries used:
+
 python 3.11
 discord.py 2.4
 sqlite 3
