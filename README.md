@@ -1,12 +1,15 @@
 # nanabot
 warframe snipe bot for wfm rm and a rough version of tc ocr
 
+--------------------------------------------------------------------------------------------------------------
+
 commands.py is for the /commands
 
 scraper.py is for the wfm/rm web scraping
 
 tc_ocr_scraper.py is the tc scraper
 
+--------------------------------------------------------------------------------------------------------------
 
 lines to replace:
 
@@ -24,7 +27,7 @@ put your sss grade channel id here
 
 put your fff grade channel id here
 
-
+--------------------------------------------------------------------------------------------------------------
 
 commands avaiable:
 
@@ -58,7 +61,7 @@ commands avaiable:
 
 /wfm_grade -> given a wfm url grade a riven
 
-
+--------------------------------------------------------------------------------------------------------------
 
 libraries used:
 
