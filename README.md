@@ -7,6 +7,23 @@ scraper.py is for the wfm/rm web scraping
 
 tc_ocr_scraper.py is the tc scraper
 
+lines to replace:
+
+put your snipe channel id here
+
+put your blacklist channel id here
+
+put your discord bot token here
+
+put your guild id here
+
+put your alerts channel id here
+
+put your sss grade channel id here
+
+put your fff grade channel id here
+
+
 commands avaiable:
 
 /search -> lets ya search the db of rivens my bot has seen
