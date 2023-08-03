@@ -29,7 +29,7 @@ put your fff grade channel id here
 
 --------------------------------------------------------------------------------------------------------------
 
-commands avaiable:
+commands available:
 
 /search -> lets ya search the db of rivens my bot has seen
 
