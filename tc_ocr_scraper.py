@@ -17,10 +17,10 @@ intents.message_content = True
 
 client = discord.Client(intents = intents)
 
-#load the discord token and id
+#discord token and guild
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+TOKEN = 'put your discord bot token here'
+GUILD = 'put your guild id here'
 
 #varrs needed
 identifier = set()
