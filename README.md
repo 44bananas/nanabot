@@ -42,9 +42,9 @@ commands avaiable:
 
 libraries used:
 
-python 3.11
-discord.py 2.4
-sqlite 3
+python3.11
+discord.py2.4
+sqlite3
 requests
 python-dateutil
 python-dotenv
