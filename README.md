@@ -7,6 +7,7 @@ scraper.py is for the wfm/rm web scraping
 
 tc_ocr_scraper.py is the tc scraper
 
+
 lines to replace:
 
 put your snipe channel id here
@@ -22,6 +23,7 @@ put your alerts channel id here
 put your sss grade channel id here
 
 put your fff grade channel id here
+
 
 
 commands avaiable:
@@ -55,6 +57,7 @@ commands avaiable:
 /img_gen -> create a graded img of a riven
 
 /wfm_grade -> given a wfm url grade a riven
+
 
 
 libraries used:
