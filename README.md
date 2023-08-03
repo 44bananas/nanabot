@@ -7,7 +7,7 @@ scraper.py is for the wfm/rm web scraping
 
 tc_ocr_scraper.py is the tc scraper
 
-commands avaiable:
+commands avaiable:\n
 /search -> lets ya search the db of rivens my bot has seen
 /blacklist -> add people to the blacklist
 /filterlist -> print all the filters in discord
