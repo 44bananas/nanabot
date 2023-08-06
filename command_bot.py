@@ -28,8 +28,8 @@ from pagination_file_send import Pagination_file_send
 
 #discord token and guild
 load_dotenv()
-TOKEN = 'put your discord bot token here'
-GUILD = 'put your guild id here'
+TOKEN = os.getenv('DISCORD_TOKEN')
+GUILD = os.getenv('DISCORD_GUILD')
 
 #discord intents
 intents = discord.Intents.all()
