@@ -10,10 +10,12 @@ import json
 import prefixes_create
 from discord import Color
 from discord.ext import tasks
+from dotenv import load_dotenv
 
-#declare discord intents
-intents = discord.Intents.all()
-intents.message_content = True
+#discord token and guild
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
+GUILD = os.getenv('DISCORD_GUILD')
 
 client = discord.Client(intents = intents)
 
