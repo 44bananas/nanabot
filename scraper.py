@@ -24,8 +24,16 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, file
 
 #discord token and guild
 load_dotenv()
-TOKEN = 'put your discord bot token here'
-GUILD = 'put your guild id here'
+os.environ.get()
+TOKEN = os.getenv('DISCORD_TOKEN')
+GUILD = os.getenv('DISCORD_GUILD')
+
+#channel ids
+snipe = os.getenv('snipe')
+bl = os.getenv('bl')
+alerts = os.getenv('alerts')
+sss = os.getenv('sss')
+fff = os.getenv('fff')
 
 db_identifiers = set()
 db_identifiers_sss_fff = set()
@@ -247,9 +255,9 @@ async def wfm_snipe_loop():
                                         logging.info("send to wfm_send_discord")
                                         #check name against blacklist
                                         if str(riven_data[x]['user']).lower() not in str(blacklist).lower():
-                                            await wfm_send_discord(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['start_price'], riven_data[x]['bo_price'], riven_data[x]['wfm_auc'], description, riven_data[x]['user'], str(y), riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],put your snipe channel id here)
+                                            await wfm_send_discord(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['start_price'], riven_data[x]['bo_price'], riven_data[x]['wfm_auc'], description, riven_data[x]['user'], str(y), riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],snipe)
                                         else:
-                                            await wfm_send_discord(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['start_price'], riven_data[x]['bo_price'], riven_data[x]['wfm_auc'], description, riven_data[x]['user'], str(y), riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],put your blacklist channel id here)
+                                            await wfm_send_discord(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['start_price'], riven_data[x]['bo_price'], riven_data[x]['wfm_auc'], description, riven_data[x]['user'], str(y), riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],bl)
             #add identifier to the identifiers list
             db_identifiers.add(identifier)
         #add rivens to the db
@@ -257,148 +265,145 @@ async def wfm_snipe_loop():
                     (str(riven_data[x]['user']), str(riven_data[x]['weapon']), str(riven_data[x]['prefix']),riven_data[x]['start_price'], str(riven_data[x]['rank']), str(riven_data[x]['mr']), str(riven_data[x]['polarity']), str(riven_data[x]['rerolls']), str(riven_data[x]['pos1']).replace("_"," ").lower(), str(riven_data[x]['pos_val1']).replace("_"," ").lower(), str(riven_data[x]['pos2']).replace("_"," ").lower(), str(riven_data[x]['pos_val2']).replace("_"," ").lower(), str(riven_data[x]['pos3']).replace("_"," ").lower(), str(riven_data[x]['pos_val3']).replace("_"," ").lower(), str(riven_data[x]['neg']).replace("_"," ").lower(), str(riven_data[x]['neg_values']).replace("_"," ").lower(), str(identifier),todays_date))
         con.commit()
 
-#rm loop commented out because it was causing slowdowns
-# #loop to scrape rm
-# @tasks.loop(seconds=10)
-# async def rm_snipe_loop():
-#     #open dispos
-#     with open("rifle_dispos.txt") as json_file:
-#         rifle_dispos = json.load(json_file)
-#     with open("pistol_dispos.txt") as json_file:
-#         pistol_dispos = json.load(json_file)
-#     with open("melee_dispos.txt") as json_file:
-#         melee_dispos = json.load(json_file)
-#     with open("shotgun_dispos.txt") as json_file:
-#         shotgun_dispos = json.load(json_file)
-#     with open("archgun_dispos.txt") as json_file:
-#         archgun_dispos = json.load(json_file)
-#     with open("kitgun_dispos.txt") as json_file:
-#         kitgun_dispos = json.load(json_file)
-#     global db_identifiers
-#     logging.info('start of rm loop')
-#     #grab rivens from r.m
-#     rm_url = "https://riven.market/_modules/riven/showrivens.php?baseurl=Lw==&platform=PC&limit=500&recency=1&veiled=false&onlinefirst=false&polarity=all&rank=all&mastery=16&weapon=Any&stats=Any&neg=Any&price=99999&rerolls=-1&sort=time&direction=ASC&page=1&time=0"
+#loop to scrape rm
+@tasks.loop(seconds=10)
+async def rm_snipe_loop():
+    #open dispos
+    with open("rifle_dispos.txt") as json_file:
+        rifle_dispos = json.load(json_file)
+    with open("pistol_dispos.txt") as json_file:
+        pistol_dispos = json.load(json_file)
+    with open("melee_dispos.txt") as json_file:
+        melee_dispos = json.load(json_file)
+    with open("shotgun_dispos.txt") as json_file:
+        shotgun_dispos = json.load(json_file)
+    with open("archgun_dispos.txt") as json_file:
+        archgun_dispos = json.load(json_file)
+    with open("kitgun_dispos.txt") as json_file:
+        kitgun_dispos = json.load(json_file)
+    global db_identifiers
+    logging.info('start of rm loop')
+    #grab rivens from r.m
+    rm_url = "https://riven.market/_modules/riven/showrivens.php?baseurl=Lw==&platform=PC&limit=250&recency=1&veiled=false&onlinefirst=false&polarity=all&rank=all&mastery=16&weapon=Any&stats=Any&neg=Any&price=99999&rerolls=-1&sort=time&direction=ASC&page=1&time=0"
 
-#     r = requests.get(rm_url)
-#     soup = bs4(r.content,"lxml")
+    r = requests.get(rm_url)
+    soup = bs4(r.content,"lxml")
 
-#     table = soup.find('div',attrs={"id":"riven-list"})
+    table = soup.find('div',attrs={"id":"riven-list"})
 
-#     users = []
-#     riven_data = {}
-#     count = 0
+    users = []
+    riven_data = {}
+    count = 0
 
-#     for row in table.findAll('div',attrs={'class':"attribute seller"}):
-#         users += [str(row.text).replace(" ","")]
+    for row in table.findAll('div',attrs={'class':"attribute seller"}):
+        users += [str(row.text).replace(" ","")]
 
-#     for row,x in zip(table.findAll('div', attrs={'class':"riven"}),users):
-#         count += 1
-#         riven_data.update({count:{'weapon':row['data-weapon'],'prefix':row['data-name'],'pos1':row['data-stat1'],'pos_val1':row['data-stat1val'],'pos2':row['data-stat2'],'pos_val2':row['data-stat2val'],'pos3':row['data-stat3'],'pos_val3':row['data-stat3val'],'neg':row['data-stat4'],'negval':row['data-stat4val'], "mr":row['data-mr'],"rank":row['data-rank'],"polarity":row['data-polarity'],"rerolls":row['data-rerolls'],"price":row['data-price'], "user":x}})
-#     logging.info('got all the riven data for rm')
-#     #filter through the data
-#     with open("filters.json") as json_file:
-#         filters = json.load(json_file)
+    for row,x in zip(table.findAll('div', attrs={'class':"riven"}),users):
+        count += 1
+        riven_data.update({count:{'weapon':row['data-weapon'],'prefix':row['data-name'],'pos1':row['data-stat1'],'pos_val1':row['data-stat1val'],'pos2':row['data-stat2'],'pos_val2':row['data-stat2val'],'pos3':row['data-stat3'],'pos_val3':row['data-stat3val'],'neg':row['data-stat4'],'negval':row['data-stat4val'], "mr":row['data-mr'],"rank":row['data-rank'],"polarity":row['data-polarity'],"rerolls":row['data-rerolls'],"price":row['data-price'], "user":x}})
+    logging.info('got all the riven data for rm')
+    #filter through the data
+    with open("filters.json") as json_file:
+        filters = json.load(json_file)
 
-#     todays_date = date.today()
+    todays_date = date.today()
 
-#     blacklist = []
-#     number = 0
+    blacklist = []
 
-#     # select the db
-#     con = sqlite3.connect("rm.db")
-#     cur = con.cursor()
-#     logging.info('before the rm filter')
-#     for x in riven_data:
-#         #make identifier for the riven
-#         identifier = str(riven_data[x]['user']).strip()  ,str(str(riven_data[x]['weapon']).replace("_"," "))  ,str(riven_data[x]['prefix']) ,str(riven_data[x]['rank'])  ,str(riven_data[x]['mr']) ,str(riven_data[x]['polarity'])  ,str(riven_data[x]['pos_val1'])  ,str(riven_data[x]['pos1'])  ,str(riven_data[x]['pos_val2'])  ,str(riven_data[x]['pos2'])  ,str(riven_data[x]['pos_val3'])  ,str(riven_data[x]['pos3'])  ,str(riven_data[x]['negval'])  ,str(riven_data[x]['neg'])
-#         #replace _ with space
-#         stat1name = str(riven_data[x]['pos1']).replace("_"," ")
-#         stat2name = str(riven_data[x]['pos2']).replace("_"," ")
-#         stat3name = str(riven_data[x]['pos3']).replace("_"," ")
-#         negstat = str(riven_data[x]['neg']).replace("_"," ")
-#         #translate riven.market backend names with the backend names I use for grading and filters
-#         stat1name = translator_search.translate_rm(stat1name)
-#         stat2name = translator_search.translate_rm(stat2name)
-#         stat3name = translator_search.translate_rm(stat3name)
-#         negstat = translator_search.translate_rm(negstat)
-#         #if stat doesnt exist make it an empty list
-#         if stat3name == "":
-#             stat3name = []
-#         if negstat == "":
-#             negstat = []
-#         #check if its in the identifier already
-#         if identifier not in db_identifiers:
-#             for y in filters:
-#                     #filter the riven
-#                     if str(riven_data[x]['weapon']).replace("_"," ").lower() in filters[y]['weapon'] or filters[y]['weapon'] == "1" or (str(filters[y]['weapon']).lower() == 'melee' and str(riven_data[x]['weapon']).replace("_"," ").lower() in melee_dispos)or (str(filters[y]['weapon']).lower() == 'shotgun' and str(riven_data[x]['weapon']).replace("_"," ").lower() in shotgun_dispos)or (str(filters[y]['weapon']).lower() == 'rifle' and str(riven_data[x]['weapon']).replace("_"," ").lower() in rifle_dispos)or (str(filters[y]['weapon']).lower() == 'archgun' and str(riven_data[x]['weapon']).replace("_"," ").lower() in archgun_dispos)or (str(filters[y]['weapon']).lower() == 'pistol' and str(riven_data[x]['weapon']).replace("_"," ").lower() in pistol_dispos)or (str(filters[y]['weapon']).lower() == 'kitgun' and str(riven_data[x]['weapon']).replace("_"," ").lower() in kitgun_dispos):
-#                         if str(stat1name) in filters[y]['pos1'] or str(stat1name) in filters[y]['pos2'] or str(stat1name) in filters[y]['pos3'] or filters[y]['pos1'] == "1"or filters[y]['pos2'] == "1"or filters[y]['pos3'] == "1":
-#                                     if str(stat2name) in filters[y]['pos1'] or str(stat2name) in filters[y]['pos2'] or str(stat2name) in filters[y]['pos3']or filters[y]['pos1'] == "1"or filters[y]['pos2'] == "1"or filters[y]['pos3'] == "1":
-#                                         if str(stat3name) in filters[y]['pos1'] or str(stat3name) in filters[y]['pos2'] or str(stat3name) in filters[y]['pos3']or filters[y]['pos1'] == "1"or filters[y]['pos2'] == "1"or filters[y]['pos3'] == "1":
-#                                             if str(negstat).lower() in filters[y]['neg'] or filters[y]['neg'] == "1":
-#                                                 logging.info('after the rm filter')
-#                                                 grades = grading_functions.get_varriants(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['pos_val1'], stat1name,riven_data[x]['pos_val2'], stat2name, riven_data[x]['pos_val3'], stat3name,riven_data[x]['negval'],negstat)
-#                                                 pos_grade1_1 = ""
-#                                                 pos_grade1_2 = ""
-#                                                 pos_grade2_1 = ""
-#                                                 pos_grade2_2 = ""
-#                                                 pos_grade3_1 = ""
-#                                                 pos_grade3_2 = ""
-#                                                 neg_grade1 = ""
-#                                                 neg_grade2 = ""
-#                                                 user = re.sub("[-]","\-",str(re.sub("[_]","\_",str(riven_data[x]['user']).lower().strip())))
-#                                                 description = "/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on riven.market" + "\n\n"
-#                                                 #seperate the grades out
-#                                                 if grades == {}:
-#                                                     # print(str(riven_data[x]['weapon']).replace("_"," ").title(), str(stat1name)+ " "+ str(riven_data[x]['pos_val1']), str(stat2name)+ " "+ str(riven_data[x]['pos_val2']), str(stat3name)+ " "+ str(riven_data[x]['pos_val3']), str(negstat)+ " "+ str(riven_data[x]['negval']), user)
-#                                                     description += str(riven_data[x]['weapon']).replace("_"," ").title() + " "+"\n"+ str(stat1name)+ " "+ str(riven_data[x]['pos_val1'])+ " "+  " \n"+ str(stat2name)+ " "+ str(riven_data[x]['pos_val2']) + " "+ " \n"+ str(stat3name)+ " "+ str(riven_data[x]['pos_val3'])+ " " +" \n"+ str(negstat)+ " "+ str(riven_data[x]['negval']) + "\n" + "\n"
-#                                                 else:
-#                                                     for z in grades:
-#                                                         try:
-#                                                             pos1_color, pos_grade1_1, pos_grade1_2 = grades[z]['pos1']
-#                                                         except:
-#                                                             pos1_color = ""
-#                                                             pos_grade1_1 = ""
-#                                                             pos_grade1_2 = ""
-#                                                         try:
-#                                                             pos2_color,pos_grade2_1, pos_grade2_2 = grades[z]['pos2']
-#                                                         except:
-#                                                             pos2_color = ""
-#                                                             pos_grade2_1 = ""
-#                                                             pos_grade2_2 = ""
-#                                                         try:
-#                                                             pos3_color, pos_grade3_1, pos_grade3_2 = grades[z]['pos3']
-#                                                         except:
-#                                                             pos3_color = ""
-#                                                             pos_grade3_1 = ""
-#                                                             pos_grade3_2 = ""
-#                                                         try:
-#                                                             neg_color, neg_grade1, neg_grade2 = grades[z]['neg']
-#                                                         except:
-#                                                             neg_color = ""
-#                                                             neg_grade1 = ""
-#                                                             neg_grade2 = ""
-#                                                         stat1name = await print_replace(stat1name)
-#                                                         stat2name = await print_replace(stat2name)
-#                                                         stat3name = await print_replace(stat3name)
-#                                                         negstat = await print_replace(negstat)
-#                                                         description += str(grades[z]['weapon']).title() + " "+"\n"+pos1_color + str(stat1name)+ " "+ str(riven_data[x]['pos_val1'])+ " "+ " ("+ str(pos_grade1_1)+ "%, " + str(pos_grade1_2)+ ") " + " \n"+pos2_color+ str(stat2name)+ " "+ str(riven_data[x]['pos_val2']) + " "+ " ("+str(pos_grade2_1)+ "%, "+ str(pos_grade2_2)+ ") " + " \n"+pos3_color+ str(stat3name)+ " "+ str(riven_data[x]['pos_val3'])+ " "+   " ("+str(pos_grade3_1)+ "%, "+ str(pos_grade3_2) + ") " +" \n"+neg_color+ str(negstat)+ " "+ str(riven_data[x]['negval']) + " "+" ("+str(neg_grade1)+ "%, "+ str(neg_grade2) + ")\n" + "\n"
-#                                                 #open the blacklist file
-#                                                 with open('blacklist.txt') as blacklist_file:
-#                                                     for line in blacklist_file:
-#                                                         line = line.replace('\n','')
-#                                                         blacklist.append(line.lower())
-#                                                 logging.info('send to rm_send_discord')
-#                                                 #check name against blacklist
-#                                                 if str(riven_data[x]['user']).lower().strip() not in str(blacklist).lower().strip():
-#                                                     await rm_send_discord(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['price'], description, riven_data[x]['user'], str(y), riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],put your snipe channel id here)
-#                                                 else:
-#                                                     await rm_send_discord(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['price'], description, riven_data[x]['user'], str(y), riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],put your blacklist channel id here)
-#             #add identifier to the identifiers list
-#             db_identifiers.add(identifier)
-#         #add rivens to the db
-#         con.execute("INSERT OR IGNORE INTO rivens (usernames, weapon, prefix, price, rank, mr, polarity, rerolls, stat1name, stat1stats, stat2name, stat2stats, stat3name, stat3stats, stat4name, stat4stats, identifier, date) values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-#                     (str(riven_data[x]['user']).strip(), str(riven_data[x]['weapon']).lower(), str(riven_data[x]['prefix']),riven_data[x]['price'], str(riven_data[x]['rank']), str(riven_data[x]['mr']), str(riven_data[x]['polarity']), str(riven_data[x]['rerolls']), str(stat1name), str(riven_data[x]['pos_val1']), str(stat2name), str(riven_data[x]['pos_val2']), str(stat3name), str(riven_data[x]['pos_val3']), str(negstat), str(riven_data[x]['negval']), str(identifier),todays_date))
-#         con.commit()
+    # select the db
+    con = sqlite3.connect("rm.db")
+    logging.info('before the rm filter')
+    for x in riven_data:
+        #make identifier for the riven
+        identifier = str(riven_data[x]['user']).strip()  ,str(str(riven_data[x]['weapon']).replace("_"," "))  ,str(riven_data[x]['prefix']) ,str(riven_data[x]['rank'])  ,str(riven_data[x]['mr']) ,str(riven_data[x]['polarity'])  ,str(riven_data[x]['pos_val1'])  ,str(riven_data[x]['pos1'])  ,str(riven_data[x]['pos_val2'])  ,str(riven_data[x]['pos2'])  ,str(riven_data[x]['pos_val3'])  ,str(riven_data[x]['pos3'])  ,str(riven_data[x]['negval'])  ,str(riven_data[x]['neg'])
+        #replace _ with space
+        stat1name = str(riven_data[x]['pos1']).replace("_"," ")
+        stat2name = str(riven_data[x]['pos2']).replace("_"," ")
+        stat3name = str(riven_data[x]['pos3']).replace("_"," ")
+        negstat = str(riven_data[x]['neg']).replace("_"," ")
+        #translate riven.market backend names with the backend names I use for grading and filters
+        stat1name = translator_search.translate_rm(stat1name)
+        stat2name = translator_search.translate_rm(stat2name)
+        stat3name = translator_search.translate_rm(stat3name)
+        negstat = translator_search.translate_rm(negstat)
+        #if stat doesnt exist make it an empty list
+        if stat3name == "":
+            stat3name = []
+        if negstat == "":
+            negstat = []
+        #check if its in the identifier already
+        if identifier not in db_identifiers:
+            for y in filters:
+                    #filter the riven
+                    if str(riven_data[x]['weapon']).replace("_"," ").lower() in filters[y]['weapon'] or filters[y]['weapon'] == "1" or (str(filters[y]['weapon']).lower() == 'melee' and str(riven_data[x]['weapon']).replace("_"," ").lower() in melee_dispos)or (str(filters[y]['weapon']).lower() == 'shotgun' and str(riven_data[x]['weapon']).replace("_"," ").lower() in shotgun_dispos)or (str(filters[y]['weapon']).lower() == 'rifle' and str(riven_data[x]['weapon']).replace("_"," ").lower() in rifle_dispos)or (str(filters[y]['weapon']).lower() == 'archgun' and str(riven_data[x]['weapon']).replace("_"," ").lower() in archgun_dispos)or (str(filters[y]['weapon']).lower() == 'pistol' and str(riven_data[x]['weapon']).replace("_"," ").lower() in pistol_dispos)or (str(filters[y]['weapon']).lower() == 'kitgun' and str(riven_data[x]['weapon']).replace("_"," ").lower() in kitgun_dispos):
+                        if str(stat1name) in filters[y]['pos1'] or str(stat1name) in filters[y]['pos2'] or str(stat1name) in filters[y]['pos3'] or filters[y]['pos1'] == "1"or filters[y]['pos2'] == "1"or filters[y]['pos3'] == "1":
+                                    if str(stat2name) in filters[y]['pos1'] or str(stat2name) in filters[y]['pos2'] or str(stat2name) in filters[y]['pos3']or filters[y]['pos1'] == "1"or filters[y]['pos2'] == "1"or filters[y]['pos3'] == "1":
+                                        if str(stat3name) in filters[y]['pos1'] or str(stat3name) in filters[y]['pos2'] or str(stat3name) in filters[y]['pos3']or filters[y]['pos1'] == "1"or filters[y]['pos2'] == "1"or filters[y]['pos3'] == "1":
+                                            if str(negstat).lower() in filters[y]['neg'] or filters[y]['neg'] == "1":
+                                                logging.info('after the rm filter')
+                                                grades = grading_functions.get_varriants(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['pos_val1'], stat1name,riven_data[x]['pos_val2'], stat2name, riven_data[x]['pos_val3'], stat3name,riven_data[x]['negval'],negstat)
+                                                pos_grade1_1 = ""
+                                                pos_grade1_2 = ""
+                                                pos_grade2_1 = ""
+                                                pos_grade2_2 = ""
+                                                pos_grade3_1 = ""
+                                                pos_grade3_2 = ""
+                                                neg_grade1 = ""
+                                                neg_grade2 = ""
+                                                user = re.sub("[-]","\-",str(re.sub("[_]","\_",str(riven_data[x]['user']).lower().strip())))
+                                                description = "/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on riven.market" + "\n\n"
+                                                #seperate the grades out
+                                                if grades == {}:
+                                                    # print(str(riven_data[x]['weapon']).replace("_"," ").title(), str(stat1name)+ " "+ str(riven_data[x]['pos_val1']), str(stat2name)+ " "+ str(riven_data[x]['pos_val2']), str(stat3name)+ " "+ str(riven_data[x]['pos_val3']), str(negstat)+ " "+ str(riven_data[x]['negval']), user)
+                                                    description += str(riven_data[x]['weapon']).replace("_"," ").title() + " "+"\n"+ str(stat1name)+ " "+ str(riven_data[x]['pos_val1'])+ " "+  " \n"+ str(stat2name)+ " "+ str(riven_data[x]['pos_val2']) + " "+ " \n"+ str(stat3name)+ " "+ str(riven_data[x]['pos_val3'])+ " " +" \n"+ str(negstat)+ " "+ str(riven_data[x]['negval']) + "\n" + "\n"
+                                                else:
+                                                    for z in grades:
+                                                        try:
+                                                            pos1_color, pos_grade1_1, pos_grade1_2 = grades[z]['pos1']
+                                                        except:
+                                                            pos1_color = ""
+                                                            pos_grade1_1 = ""
+                                                            pos_grade1_2 = ""
+                                                        try:
+                                                            pos2_color,pos_grade2_1, pos_grade2_2 = grades[z]['pos2']
+                                                        except:
+                                                            pos2_color = ""
+                                                            pos_grade2_1 = ""
+                                                            pos_grade2_2 = ""
+                                                        try:
+                                                            pos3_color, pos_grade3_1, pos_grade3_2 = grades[z]['pos3']
+                                                        except:
+                                                            pos3_color = ""
+                                                            pos_grade3_1 = ""
+                                                            pos_grade3_2 = ""
+                                                        try:
+                                                            neg_color, neg_grade1, neg_grade2 = grades[z]['neg']
+                                                        except:
+                                                            neg_color = ""
+                                                            neg_grade1 = ""
+                                                            neg_grade2 = ""
+                                                        stat1name = await print_replace(stat1name)
+                                                        stat2name = await print_replace(stat2name)
+                                                        stat3name = await print_replace(stat3name)
+                                                        negstat = await print_replace(negstat)
+                                                        description += str(grades[z]['weapon']).title() + " "+"\n"+pos1_color + str(stat1name)+ " "+ str(riven_data[x]['pos_val1'])+ " "+ " ("+ str(pos_grade1_1)+ "%, " + str(pos_grade1_2)+ ") " + " \n"+pos2_color+ str(stat2name)+ " "+ str(riven_data[x]['pos_val2']) + " "+ " ("+str(pos_grade2_1)+ "%, "+ str(pos_grade2_2)+ ") " + " \n"+pos3_color+ str(stat3name)+ " "+ str(riven_data[x]['pos_val3'])+ " "+   " ("+str(pos_grade3_1)+ "%, "+ str(pos_grade3_2) + ") " +" \n"+neg_color+ str(negstat)+ " "+ str(riven_data[x]['negval']) + " "+" ("+str(neg_grade1)+ "%, "+ str(neg_grade2) + ")\n" + "\n"
+                                                #open the blacklist file
+                                                with open('blacklist.txt') as blacklist_file:
+                                                    for line in blacklist_file:
+                                                        line = line.replace('\n','')
+                                                        blacklist.append(line.lower())
+                                                logging.info('send to rm_send_discord')
+                                                #check name against blacklist
+                                                if str(riven_data[x]['user']).lower().strip() not in str(blacklist).lower().strip():
+                                                    await rm_send_discord(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['price'], description, riven_data[x]['user'], str(y), riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],snipe)
+                                                else:
+                                                    await rm_send_discord(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['price'], description, riven_data[x]['user'], str(y), riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],bl)
+            #add identifier to the identifiers list
+            db_identifiers.add(identifier)
+        #add rivens to the db
+        con.execute("INSERT OR IGNORE INTO rivens (usernames, weapon, prefix, price, rank, mr, polarity, rerolls, stat1name, stat1stats, stat2name, stat2stats, stat3name, stat3stats, stat4name, stat4stats, identifier, date) values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (str(riven_data[x]['user']).strip(), str(riven_data[x]['weapon']).lower(), str(riven_data[x]['prefix']),riven_data[x]['price'], str(riven_data[x]['rank']), str(riven_data[x]['mr']), str(riven_data[x]['polarity']), str(riven_data[x]['rerolls']), str(stat1name), str(riven_data[x]['pos_val1']), str(stat2name), str(riven_data[x]['pos_val2']), str(stat3name), str(riven_data[x]['pos_val3']), str(negstat), str(riven_data[x]['negval']), str(identifier),todays_date))
+        con.commit()
 
 #loop to scrape wfm
 @tasks.loop()
@@ -566,12 +571,12 @@ async def wfm_snipe_loop_fast():
                                 if int(int(time.time()-int(created))) <= 3600:
                                     #blacklist filter
                                     if str(user).lower() not in str(blacklist).lower():
-                                        channel = client.get_channel(put your snipe channel id here)
+                                        channel = client.get_channel(snipe)
                                         embed = discord.Embed(title=str(weapon_name).replace("_"," ").title() + " " + prefix + " "+str(start_price) + "-" + str(bo_price),url="https://warframe.market/auction/"+wfm_url, description=description, color=discord.Color.blue())
                                         # embed.set_author(name="Filter: " + f)
                                         message = await channel.send(embed=embed)
                                     else:
-                                        channel = client.get_channel(put your blacklist channel id here)
+                                        channel = client.get_channel(bl)
                                         embed = discord.Embed(title=str(weapon_name).replace("_"," ").title() + " " + prefix + " "+str(start_price) + "-" + str(bo_price),url="https://warframe.market/auction/"+wfm_url, description=description, color=discord.Color.blue())
                                         # embed.set_author(name="Filter: " + f)
                                         message = await channel.send(embed=embed)
@@ -624,7 +629,7 @@ async def check_api():
             description += "Node: **" + new_dict[x]['node'] + "**\nReward: **" + new_dict[x]['defender']['reward']['itemString'] + "**\nDescription: **" + new_dict[x]['desc'] + "**\n\n"
     #send to discord if there is any
     if description != "":
-        channel = client.get_channel(put your alerts channel id here)
+        channel = client.get_channel(alerts)
         embed = discord.Embed(description=description)
         message = await channel.send(embed=embed)
     logging.info("check api end")
@@ -728,9 +733,9 @@ async def wfm_fff_sss_loop():
                     #add grades to the varriable
                     description += str(grades[z]['weapon']).title() + " "+"\n" +pos1_color+ pos1+ " "+ str(riven_data[x]['pos_val1'])+ " "+ " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") " + " \n"+pos2_color+ pos2+ " "+ str(riven_data[x]['pos_val2']) + " "+ " ("+str(pos_grade2_1)+ "%, "+ pos_grade2_2+ ") " + " \n"+pos3_color+ pos3+ " "+ str(riven_data[x]['pos_val3'])+ " "+   " ("+str(pos_grade3_1)+ "%, "+ pos_grade3_2 + ") " +" \n"+neg_color+ neg+ " "+ str(riven_data[x]['neg_values']) + " "+" ("+str(neg_grade1)+ "%, "+ neg_grade2 + ")\n" + "\n"
             if should_send_to_fff == True:
-                await wfm_send_discord_no_filter(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['start_price'], riven_data[x]['bo_price'], riven_data[x]['wfm_auc'], description, riven_data[x]['user'], riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],put your fff grade channel id here)
+                await wfm_send_discord_no_filter(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['start_price'], riven_data[x]['bo_price'], riven_data[x]['wfm_auc'], description, riven_data[x]['user'], riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],fff)
             if should_send_to_sss == True:
-                await wfm_send_discord_no_filter(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['start_price'], riven_data[x]['bo_price'], riven_data[x]['wfm_auc'], description, riven_data[x]['user'], riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],put your sss grade channel id here)
+                await wfm_send_discord_no_filter(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['start_price'], riven_data[x]['bo_price'], riven_data[x]['wfm_auc'], description, riven_data[x]['user'], riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],sss)
             #add identifier to the identifiers list
             db_identifiers_sss_fff.add(identifier)
     logging.info("end of the wfm fff-sss loop")
@@ -832,9 +837,9 @@ async def rm_sss_fff_loop():
                         description += str(grades[z]['weapon']).title() + " "+"\n"+pos1_color + str(stat1name)+ " "+ str(riven_data[x]['pos_val1'])+ " "+ " ("+ str(pos_grade1_1)+ "%, " + str(pos_grade1_2)+ ") " + " \n"+pos2_color+ str(stat2name)+ " "+ str(riven_data[x]['pos_val2']) + " "+ " ("+str(pos_grade2_1)+ "%, "+ str(pos_grade2_2)+ ") " + " \n"+pos3_color+ str(stat3name)+ " "+ str(riven_data[x]['pos_val3'])+ " "+   " ("+str(pos_grade3_1)+ "%, "+ str(pos_grade3_2) + ") " +" \n"+neg_color+ str(negstat)+ " "+ str(riven_data[x]['negval']) + " "+" ("+str(neg_grade1)+ "%, "+ str(neg_grade2) + ")\n" + "\n"
             logging.info('send to rm_send_discord')
             if should_send_to_fff == True:
-                await rm_send_discord_no_filter(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['price'], description, riven_data[x]['user'], riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],put your fff grade channel id here)
+                await rm_send_discord_no_filter(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['price'], description, riven_data[x]['user'], riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],fff)
             if should_send_to_sss == True:
-                await rm_send_discord_no_filter(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['price'], description, riven_data[x]['user'], riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],put your sss grade channel id here)
+                await rm_send_discord_no_filter(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['prefix'], riven_data[x]['price'], description, riven_data[x]['user'], riven_data[x]['mr'], riven_data[x]['rerolls'], riven_data[x]['polarity'], riven_data[x]['rank'],sss)
             #add identifier to the identifiers list
             db_identifiers_sss_fff.add(identifier)
 
