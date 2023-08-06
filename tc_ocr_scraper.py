@@ -19,10 +19,9 @@ GUILD = os.getenv('DISCORD_GUILD')
 
 client = discord.Client(intents = intents)
 
-#discord token and guild
-load_dotenv()
-TOKEN = 'put your discord bot token here'
-GUILD = 'put your guild id here'
+#snipe channel and blacklist id
+snipe = int(os.getenv('snipe'))
+bl = int(os.getenv('bl'))
 
 #varrs needed
 identifier = set()
