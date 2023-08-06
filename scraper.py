@@ -29,11 +29,11 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
 #channel ids
-snipe = os.getenv('snipe')
-bl = os.getenv('bl')
-alerts = os.getenv('alerts')
-sss = os.getenv('sss')
-fff = os.getenv('fff')
+snipe = int(os.getenv('snipe'))
+bl = int(os.getenv('bl'))
+alerts = int(os.getenv('alerts'))
+sss = int(os.getenv('sss'))
+fff = int(os.getenv('fff'))
 
 db_identifiers = set()
 db_identifiers_sss_fff = set()
