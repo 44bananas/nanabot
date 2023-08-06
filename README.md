@@ -11,7 +11,7 @@ tc_ocr_scraper.py is the tc scraper
 
 --------------------------------------------------------------------------------------------------------------
 
-lines to replace:
+lines to replace in .env:
 
 put your snipe channel id here
 
