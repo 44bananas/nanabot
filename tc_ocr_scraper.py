@@ -20,15 +20,11 @@ GUILD = os.getenv('DISCORD_GUILD')
 client = discord.Client(intents = intents)
 
 #snipe channel and blacklist id
-snipe = int(os.getenv('snipe'))
-bl = int(os.getenv('bl'))
+pc_snipe = int(os.getenv('snipe'))
+pc_bl = int(os.getenv('bl'))
 
 #varrs needed
 identifier = set()
-
-#channel ids
-pc_snipe = put your snipe channel id here
-pc_bl = put your blacklist channel id here
 
 #tc ocr scraper
 @tasks.loop()
