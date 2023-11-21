@@ -65,10 +65,17 @@ commands available:
 
 libraries used:
 
+pandas
 python3.11
 discord.py2.4
+dateutil
 sqlite3
 requests
+os
+grequests
+typing
+random
+io
 python-dateutil
 python-dotenv
 pillow
