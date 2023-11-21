@@ -61,6 +61,14 @@ commands available:
 
 /wfm_grade -> given a wfm url grade a riven
 
+/top -> shows top 10 most expensive riven sales
+
+/popular -> shows top 10 most popular weapon rivens sold
+
+/veiledprices -> shows veiled riven prices from the last week
+
+/price -> show weekly sell prices(max max avg) of specific riven
+
 --------------------------------------------------------------------------------------------------------------
 
 libraries used:
