@@ -133,7 +133,7 @@ def riven_img(weapon, stat1name_raw, stat1stat, stat2name_raw, stat2stat, stat3n
         else:
             number_of_lines += 2
         #assign vars depending on length of lines
-        if number_of_lines >= 8:
+        if number_of_lines >= 7:
             base_riven = long_riven
             bottom_row = 463
         elif number_of_lines >= 6:
@@ -246,7 +246,7 @@ def riven_img(weapon, stat1name_raw, stat1stat, stat2name_raw, stat2stat, stat3n
 
         #create the bottom bar where mr and reroll count
         if roll_count == 0:
-            draw.text((165,418),"MR " + str(mr),font=roll_font, fill = (171, 136, 204))
+            draw.text((165,bottom_row),"MR " + str(mr),font=roll_font, fill = (171, 136, 204))
         elif len(str(roll_count)) == 1:
             #if rerolls = 1 digit
             base_riven.paste(rolled, (275,bottom_row-1),rolled)

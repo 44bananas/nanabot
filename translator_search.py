@@ -33,7 +33,6 @@ translates = {
     "z":"zoom"
 }
 
-
 translates_rm = {
     "Corpus":"damage vs corpus",
     "Grineer":"damage vs grineer",

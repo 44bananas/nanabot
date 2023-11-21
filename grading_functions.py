@@ -89,6 +89,7 @@ def get_varriants(weapon, stat1val, stat1name, stat2val, stat2name, stat3val, st
     negstat = str(negstat).lower()
     #weapon names to check
     kuva_varriant = "kuva " + weapon
+    ceti_varriant = "ceti " + weapon
     prime_varriant = weapon + " prime"
     tenet_varriant = "tenet " + weapon
     prisma_varriant = "prisma " + weapon
@@ -105,9 +106,9 @@ def get_varriants(weapon, stat1val, stat1name, stat2val, stat2name, stat3val, st
     mara_varriant = "mara " + weapon
     if weapon == "Afuris":
         dex_varriant = "Dex Furis"
-        weapon_list = [dex_varriant,kuva_varriant, prime_varriant, tenet_varriant, prisma_varriant, wraith_varriant, synoid_varriant, vandal_varriant, mk1_varriant, sancti_varriant, carmine_varriant, telos_varriant, rakta_varriant, secura_varriant, vaykor_varriant, mara_varriant, weapon]
+        weapon_list = [ceti_varriant,dex_varriant,kuva_varriant, prime_varriant, tenet_varriant, prisma_varriant, wraith_varriant, synoid_varriant, vandal_varriant, mk1_varriant, sancti_varriant, carmine_varriant, telos_varriant, rakta_varriant, secura_varriant, vaykor_varriant, mara_varriant, weapon]
     else:
-        weapon_list = [kuva_varriant, prime_varriant, tenet_varriant, prisma_varriant, wraith_varriant, synoid_varriant, vandal_varriant, mk1_varriant, sancti_varriant, carmine_varriant, telos_varriant, rakta_varriant, secura_varriant, vaykor_varriant, mara_varriant, weapon]
+        weapon_list = [ceti_varriant,kuva_varriant, prime_varriant, tenet_varriant, prisma_varriant, wraith_varriant, synoid_varriant, vandal_varriant, mk1_varriant, sancti_varriant, carmine_varriant, telos_varriant, rakta_varriant, secura_varriant, vaykor_varriant, mara_varriant, weapon]
     #checks if its a varriant, if it is it grabs the grades
     return get_grade(weapon_list, stat1val, stat1name, stat2val, stat2name, stat3val, stat3name, negval, negstat)
 #return grades with rm translate

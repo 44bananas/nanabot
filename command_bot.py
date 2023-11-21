@@ -39,8 +39,177 @@ intents.message_content = True
 client = discord.Client(intents = intents)
 tree = app_commands.CommandTree(client)     
 
+#weekly kitgun median price
+@tree.command(name="veiledprices", description="Check the prices of veiled rivens")
+async def veiledprices(interaction:discord.message):
+    logging.info("start of veiledprices")
+    #get the data
+    raw_data = requests.get("http://n9e5v4d8.ssl.hwcdn.net/repos/weeklyRivensPC.json")
+    data = raw_data.json()
+    #varrs needed
+    dict_of_top_10 = {}
+    number_top_10 = 0
+    #loop through and list the data in a dict
+    while len(dict_of_top_10) < 7:
+        pop = 0
+        count = 0
+        for x in data:
+            test_pop = x['pop']
+            if test_pop > pop and x['compatibility'] == None:
+                pop = x['pop']
+                weapon_type = x['itemType']
+                high = x['max']
+                low = x['min']
+                median = x['median']
+                weapon_number = count
+            if count < len(data)-1:
+                count += 1
+        del data[weapon_number]
+        number_top_10 += 1
+        dict_of_top_10.update({number_top_10:{"weapon_type":weapon_type, "max_price":high, "min_price":low, "median_price":median}})
+    description = ""
+    for x in dict_of_top_10:
+        description += "Riven: **" + str(dict_of_top_10[x]['weapon_type']) + "** \nPrice: **" + str(int(dict_of_top_10[x]['median_price'])) + "P**\n\n"
+    embed = discord.Embed(title="Veiled Riven Prices", description=description,color=discord.Color.yellow())
+    await interaction.response.send_message(embed=embed)
+    logging.info("end of veiledprices")
+
+#weekly top 10 by popularity
+@tree.command(name="popular", description="List rivens by popularity of sales with prices")
+async def popular(interaction:discord.message):
+    logging.info("start of popular")
+    #get the data
+    raw_data = requests.get("http://n9e5v4d8.ssl.hwcdn.net/repos/weeklyRivensPC.json")
+    data = raw_data.json()
+    dict_of_top_10 = {}
+    number_top_10 = 0
+    while len(dict_of_top_10) < 10:
+        pop = 0
+        count = 0
+        for x in data:
+            test_pop = x['pop']
+            if test_pop > pop and x['compatibility'] != None:
+                weapon = x['compatibility']
+                pop = x['pop']
+                weapon_type = x['itemType']
+                rerolled = x['rerolled']
+                high = x['max']
+                low = x['min']
+                median = x['median']
+                avg = x['avg']
+                weapon_number = count
+            if count < len(data)-1:
+                count += 1
+        del data[weapon_number]
+        number_top_10 += 1
+        dict_of_top_10.update({number_top_10:{"weapon":weapon, "weapon_type":weapon_type, "max_price":high, "min_price":low, "average_price":avg, "median_price":median, "rerolled":rerolled}})
+    description = ""
+    for x in dict_of_top_10:
+        if dict_of_top_10[x]['rerolled'] == True:
+            rolled = "Rolled"
+        else:
+            rolled = "Unrolled"
+        description += "Riven: **" + str(dict_of_top_10[x]['weapon']) + "** "+ rolled +"\nMedian Price: **" + str(int(dict_of_top_10[x]['median_price'])) + "P** " +"\nLowest Price: **" + str(int(dict_of_top_10[x]['min_price'])) + "P** " +"\nHighest Price: **" + str(int(dict_of_top_10[x]['max_price'])) + "P** " + "\n\n"
+    embed = discord.Embed(title="Top 10 Rivens By Popularity: ", description=description,color=discord.Color.yellow())
+    await interaction.response.send_message(embed=embed)
+    logging.info("end of popular")
+
+#get prices for a specific weapon
+@tree.command(name="price",description="Return prices of a weapon's riven sold that week")
+async def price(interaction:discord.message, weapon:str):
+    logging.info("start of price")
+    weapon = weapon.title().replace("&","And").replace("_", " ")
+    #open dispos
+    with open("rifle_dispos.txt") as json_file:
+        rifle_dispos = json.load(json_file)
+    with open("pistol_dispos.txt") as json_file:
+        pistol_dispos = json.load(json_file)
+    with open("melee_dispos.txt") as json_file:
+        melee_dispos = json.load(json_file)
+    with open("shotgun_dispos.txt") as json_file:
+        shotgun_dispos = json.load(json_file)
+    with open("archgun_dispos.txt") as json_file:
+        archgun_dispos = json.load(json_file)
+    with open("kitgun_dispos.txt") as json_file:
+        kitgun_dispos = json.load(json_file)
+    #weapon names to remove
+    kuva_varriant = "Kuva "
+    prime_varriant = " Prime"
+    tenet_varriant = "Tenet "
+    prisma_varriant = "Prisma "
+    wraith_varriant = " Wraith"
+    synoid_varriant = "Synoid "
+    vandal_varriant = " Vandal"
+    mk1_varriant = "Mk1-"
+    sancti_varriant = "Sancti "
+    carmine_varriant = "Carmine "
+    telos_varriant = "Telos "
+    rakta_varriant = "Rakta "
+    secura_varriant = "Secura "
+    vaykor_varriant = "Vaykor "
+    mara_varriant = "Mara "
+    weapon_list = [kuva_varriant, prime_varriant, tenet_varriant, prisma_varriant, wraith_varriant, synoid_varriant, vandal_varriant, mk1_varriant, sancti_varriant, carmine_varriant, telos_varriant, rakta_varriant, secura_varriant, vaykor_varriant, mara_varriant]
+    #loop through weapons and remove the varriant names
+    for x in weapon_list:
+        if x in weapon:
+            if weapon.replace(x, "")  in rifle_dispos or weapon.replace(x, "")  in pistol_dispos or weapon.replace(x, "")  in melee_dispos or weapon.replace(x, "")  in shotgun_dispos or weapon.replace(x, "")  in archgun_dispos or weapon.replace(x, "")  in kitgun_dispos:
+                if weapon == "Euphone Prime" or weapon == "Gotva Prime" or weapon == "Reaper Prime":
+                    weapon = weapon
+                elif "Gazal" not in weapon:
+                    weapon = weapon.replace(x, "").replace("And","&")
+    #get the data
+    raw_data = requests.get("http://n9e5v4d8.ssl.hwcdn.net/repos/weeklyRivensPC.json")
+    data = raw_data.json()
+    description = "**Prices this week:** \n\n"
+    for x in data:
+        if x['compatibility'] == weapon:
+            if x['rerolled'] == True:
+                rolled = ":white_check_mark:"
+            else:
+                rolled = ":x:"
+            description += "Rolled: " + rolled + "\nMaxiumum Sell: " + str(x['max']) + "\nMinimum Sell: " + str(x['min']) + "\nAverage Sell: " + str(x['avg']) + "\n\n"
+    embed = discord.Embed(title="Price for " + weapon, description=description,color=discord.Color.yellow())
+    await interaction.response.send_message(embed=embed)
+    logging.info("end of price")
+
+#weekly top 10 prices
+@tree.command(name="top", description="Check the prices of top 10 sold rivens")
+async def top(interaction:discord.message):
+    logging.info("start of top")
+    #get the data
+    raw_data = requests.get("http://n9e5v4d8.ssl.hwcdn.net/repos/weeklyRivensPC.json")
+    data = raw_data.json()
+    dict_of_top_10 = {}
+    number_top_10 = 0
+    while len(dict_of_top_10) < 10:
+        high = 0
+        count = 0
+        for x in data:
+            test_price = x['max']
+            if test_price > high:
+                weapon = x['compatibility']
+                weapon_type = x['itemType']
+                rerolled = x['rerolled']
+                high = x['max']
+                weapon_number = count
+            if count < len(data)-1:
+                count += 1
+        del data[weapon_number]
+        number_top_10 += 1
+        dict_of_top_10.update({number_top_10:{"weapon":weapon, "weapon_type":weapon_type, "max_price":high,"rerolled":rerolled}})
+    description = ""
+    for x in dict_of_top_10:
+        if dict_of_top_10[x]['rerolled'] == True:
+            rolled = "Rolled"
+        else:
+            rolled = "Unrolled"
+        description += "Riven: **" + str(dict_of_top_10[x]['weapon']) + "** \nPrice: **" + str(int(dict_of_top_10[x]['max_price'])) + "P** " + rolled + "\n\n"
+    embed = discord.Embed(title="Top 10 Rivens By Price: ", description=description,color=discord.Color.yellow())
+    await interaction.response.send_message(embed=embed)
+    logging.info("end of top")
+
 #rolls command
-@tree.command(name = "rolls", description="Check rolls for a weapon", guild=discord.Object(id=GUILD))
+@tree.command(name = "rolls", description="Check rolls for a weapon")
 async def rolls(interaction:discord.message, weapon:str):
     logging.info("start of rolls")
     #replace the and
@@ -60,10 +229,10 @@ async def rolls(interaction:discord.message, weapon:str):
     else:
         embed = discord.Embed(title="ERROR", description=weapon+" Not Found", color=discord.Color.red())
     await interaction.response.send_message(embed=embed)
-    logging.info("endo of rolls")
+    logging.info("end of rolls")
 
 #riven img(s) given a wfm link
-@tree.command(name = "wfm_grade", description="create a grade image from a wfm link", guild=discord.Object(id=GUILD))
+@tree.command(name = "wfm_grade", description="create a grade image from a wfm link")
 async def wfm_grade(interaction:discord.message,url :str):
     logging.info("start of wfm_grade")
     await interaction.response.defer()
@@ -135,7 +304,7 @@ async def wfm_grade(interaction:discord.message,url :str):
     logging.info("end of wfm_grade")
 
 #give me riven img given stats
-@tree.command(name = "img_create", description = "imgcreate", guild=discord.Object(id=GUILD))
+@tree.command(name = "img_create", description = "imgcreate")
 async def img_create(interaction:discord.message, weapon:str,stat1:str,stat1val:str, stat2:str,stat2val:str, stat3:str,stat3val:str,neg:str,negval:str,rerolls:typing.Optional[int]=random.randrange(0,1111),mr:typing.Optional[int]=random.randrange(8,16),polarity: typing.Optional[str]=random.choice(["naramon","vazarin","madurai"])):
     logging.info("start of img_create")
     embed_list = []
@@ -174,7 +343,7 @@ async def img_create(interaction:discord.message, weapon:str,stat1:str,stat1val:
     logging.info("end of img_create")
 
 #give me riven prefix name given stats
-@tree.command(name = "prefixes", description = "Give the riven prefix names", guild=discord.Object(id=GUILD))
+@tree.command(name = "prefixes", description = "Give the riven prefix names")
 async def prefixes(interaction:discord.message, stat1:str, stat2:str, stat3:str):
     logging.info("start of prefixes")
     #if stat from user = 1 then set it to none
@@ -240,7 +409,7 @@ async def prefixes(interaction:discord.message, stat1:str, stat2:str, stat3:str)
     logging.info("end of prefixes")
 
 #give riven stats, given a prefix name
-@tree.command(name = "riven", description = "Give the prefix, return stats", guild=discord.Object(id=GUILD))
+@tree.command(name = "riven", description = "Give the prefix, return stats")
 async def riven(interaction:discord.message, name:str):
     logging.info("begining of riven")
     #open prefix_suffix
@@ -252,11 +421,11 @@ async def riven(interaction:discord.message, name:str):
     third_stat = ""
     #grab the stat names from the prefixes/suffix
     for x in prefix_suffix:
-        if prefix_suffix[x]['prefix'].lower() in name and first_stat == "":
+        if prefix_suffix[x]['prefix'].lower() in name.lower() and first_stat == "":
             first_stat = x
-        elif prefix_suffix[x]['prefix'].lower() in name and second_stat == "":
+        elif prefix_suffix[x]['prefix'].lower() in name.lower() and second_stat == "":
             second_stat = x
-        if prefix_suffix[x]['suffix'].lower() in name and third_stat == "":
+        if prefix_suffix[x]['suffix'].lower() in name.lower() and third_stat == "":
             third_stat = x
     #send to discord
     if first_stat != "" and second_stat != "" and third_stat != "":
@@ -286,10 +455,9 @@ async def riven(interaction:discord.message, name:str):
     logging.info("end of riven")
 
 #unroll search wfm
-@tree.command(name = "unroll", description = "Grab 10 cheapest unroll rivens for a given weapon", guild=discord.Object(id=GUILD))
+@tree.command(name = "unroll", description = "Grab 10 cheapest unroll rivens for a given weapon")
 async def unroll(interaction:discord.message, weapon:str):
     await interaction.response.defer()
-    embed_list = []
     logging.info("unroll command start")
     wfm_search_link = "https://api.warframe.market/v1/auctions/search?type=riven&weapon_url_name="+weapon.replace(" ", "_").replace("&","and").lower()+"&polarity=any&sort_by=price_asc"
     #url to grab from
@@ -299,38 +467,13 @@ async def unroll(interaction:discord.message, weapon:str):
     count = 0
     number_of_returns = 10
     logging.info("unroll before loop")
+    description = ""
     try:
         #loop through each riven
         for x in data['payload']['auctions']:
             #check if its a pc riven
             if x['platform'] == "pc":
                 count += 1
-                #grab the pos stats
-                pos_stats = [item for item in x['item']['attributes'] if item['positive'] == True]
-                pos_stat1 = str(pos_stats[0]['url_name']).replace("_"," ")
-                pos_val1 = str(pos_stats[0]['value'])
-                pos_stat2 = str(pos_stats[1]['url_name']).replace("_"," ")
-                pos_val2 = str(pos_stats[1]['value'])
-                #seperate the pos stats and values
-                try: 
-                    pos_stat3 = str(pos_stats[2]['url_name']).replace("_"," ")
-                except:
-                    pos_stat3 = ""
-                try:
-                    pos_val3 = str(pos_stats[2]['value'])
-                except:
-                    pos_val3 = ""
-                #grab the neg stats
-                neg_stats = [item for item in x['item']['attributes'] if item['positive'] == False]
-                #sepearte the value and stat name
-                try:
-                    neg_stat = str(neg_stats[0]['url_name']).replace("_"," ")
-                except:
-                    neg_stat = ""
-                try:
-                    neg_val = str(neg_stats[0]['value'])
-                except:
-                    neg_val = ""
                 #grab the rest of the data
                 weapon_name = x['item']['weapon_url_name']
                 wfm_url = x['id']
@@ -340,38 +483,24 @@ async def unroll(interaction:discord.message, weapon:str):
                 start_price = x['starting_price']
                 bo_price = x['buyout_price']
                 mr = x['item']['mastery_level']
-                rank = x['item']['mod_rank']
                 pol = x['item']['polarity']
                 status = x['owner']['status']
-                pos_stats = pos_stat1+ " "+ pos_val1+"\n"+ pos_stat2+ " "+ pos_val2 + "\n" + pos_stat3+ " "+ pos_val3 + "\n"
-                neg_stats = neg_stat + " " + neg_val + "\n"
                 if status == "ingame":
                     #make sure they're unrolled
                     if int(rerolls) == 0:
                         if number_of_returns > 0:
                             number_of_returns += -1
-                            #send it to discord
-                            embed = discord.Embed(title=weapon_name + " " + prefix + " "+str(start_price) + "-" + str(bo_price),url="https://warframe.market/auction/"+wfm_url, description="/w " + user + " Hi, I'd like to buy your " + weapon + " " + prefix + " riven that you sell on warframe.market" +"\n\nPositives:\n "+ pos_stats+"\nNegative: \n" +  neg_stats + "\n\n" + "Mastery: " + str(mr) + " Roll Count: " + str(rerolls) + " Polarity: " + pol + " Rank: " + str(rank), color=discord.Color.blue())
-                            embed.set_author(name= user)
-                            embed_list.append(embed)
-        L = 1
-        async def get_page(page: int):
-            offset = (page-1) * L
-            for embed in embed_list[offset:offset+L]:
-                emb = embed
-            n = Pagination.compute_total_pages(len(embed_list), L)
-            emb.set_footer(text=f"Riven {page} of {n}")
-            return emb, n
-        await Pagination(interaction, get_page).navegate()
-        logging.info("after loop")
+                            description += "**[" + weapon_name.title().replace("_"," ") + " " + prefix + "](https://warframe.market/auction/"+ wfm_url + ") " + str(start_price) + "-" + str(bo_price) + " MR" + str(mr) + " " + pol.title() + "**\n/w " + user + " Hi, I'd like to buy your " + weapon + " " + prefix + " riven that you sell on warframe.market\n\n"
+        embed = discord.Embed(title="Unroll Riven Price for " + weapon_name.title().replace("_"," ") + ": ", description=description, color=discord.Color.yellow())
+        await interaction.followup.send(embed=embed)
     except:
         logging.info("error")
         embed = discord.Embed(title="Error", color=discord.Color.red())
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
     logging.info("end of unroll")
 
 #folf command
-@tree.command(name = "folf", description = "woof", guild=discord.Object(id=GUILD))
+@tree.command(name = "folf", description = "woof")
 async def folf(interaction:discord.message):
     logging.info("begining of folf")
     embed = discord.Embed(title="FLUFFFLUFFLOOFFLORFLFLFOLROFLFOFLFORLFOFL", color=discord.Color.blue())
@@ -379,10 +508,9 @@ async def folf(interaction:discord.message):
     logging.info("end of folf")
 
 #trash search wfm
-@tree.command(name = "trash", description = "Grab 10 cheapest rivens for a given weapon", guild=discord.Object(id=GUILD))
+@tree.command(name = "trash", description = "Grab 10 cheapest rivens for a given weapon")
 async def trash(interaction:discord.message, weapon:str):
     await interaction.response.defer()
-    embed_list = []
     logging.info("trash command start")
     wfm_search_link = "https://api.warframe.market/v1/auctions/search?type=riven&weapon_url_name="+weapon.replace(" ", "_").replace("&","and")+"&polarity=any&sort_by=price_asc"
     #url to grab from
@@ -392,38 +520,13 @@ async def trash(interaction:discord.message, weapon:str):
     count = 0
     number_of_returns = 10
     logging.info("trash before loop")
+    description = ""
     try:
         #loop through each riven
         for x in data['payload']['auctions']:
             #check if its a pc riven
             if x['platform'] == "pc":
                 count += 1
-                #grab the pos stats
-                pos_stats = [item for item in x['item']['attributes'] if item['positive'] == True]
-                pos_stat1 = str(pos_stats[0]['url_name']).replace("_"," ")
-                pos_val1 = str(pos_stats[0]['value'])
-                pos_stat2 = str(pos_stats[1]['url_name']).replace("_"," ")
-                pos_val2 = str(pos_stats[1]['value'])
-                #seperate the pos stats and values
-                try: 
-                    pos_stat3 = str(pos_stats[2]['url_name']).replace("_"," ")
-                except:
-                    pos_stat3 = ""
-                try:
-                    pos_val3 = str(pos_stats[2]['value'])
-                except:
-                    pos_val3 = ""
-                #grab the neg stats
-                neg_stats = [item for item in x['item']['attributes'] if item['positive'] == False]
-                #sepearte the value and stat name
-                try:
-                    neg_stat = str(neg_stats[0]['url_name']).replace("_"," ")
-                except:
-                    neg_stat = ""
-                try:
-                    neg_val = str(neg_stats[0]['value'])
-                except:
-                    neg_val = ""
                 #grab the rest of the data
                 weapon_name = x['item']['weapon_url_name']
                 wfm_url = x['id']
@@ -433,32 +536,21 @@ async def trash(interaction:discord.message, weapon:str):
                 start_price = x['starting_price']
                 bo_price = x['buyout_price']
                 mr = x['item']['mastery_level']
-                rank = x['item']['mod_rank']
                 pol = x['item']['polarity']
                 if number_of_returns > 0:
                     number_of_returns += -1
-                    #send it to discord
-                    embed = discord.Embed(title=weapon_name + " " + prefix + " "+str(start_price) + "-" + str(bo_price),url="https://warframe.market/auction/"+wfm_url, description="/w " + user + " Hi, I'd like to buy your " + weapon + " " + prefix + " riven that you sell on warframe.market" +"\n\nPositives:\n"+ pos_stat1+ " "+ pos_val1+"\n"+ pos_stat2+ " "+ pos_val2 + "\n" + pos_stat3+ " "+ pos_val3+"\n\nNegative:\n" +  neg_stat+ " "+ neg_val +" \n\n" + "Mastery: " + str(mr) + " Roll Count: " + str(rerolls) + " Polarity: " + pol + " Rank: " + str(rank)+ neg_val, color=discord.Color.blue())
-                    embed.set_author(name= user)
-                    embed_list.append(embed)
-        L = 1
-        async def get_page(page: int):
-            offset = (page-1) * L
-            for embed in embed_list[offset:offset+L]:
-                emb = embed
-            n = Pagination.compute_total_pages(len(embed_list), L)
-            emb.set_footer(text=f"Riven {page} of {n}")
-            return emb, n
-        await Pagination(interaction, get_page).navegate()
+                    description += "**[" + weapon_name.title().replace("_"," ") + " " + prefix + "](https://warframe.market/auction/"+ wfm_url + ") " + str(start_price) + "-" + str(bo_price) + " MR" + str(mr) + " " + pol.title() + " Rerolls: " + str(rerolls) + "**\n/w " + user + " Hi, I'd like to buy your " + weapon + " " + prefix + " riven that you sell on warframe.market\n\n"
+        embed = discord.Embed(title="Trash Riven Price for " + weapon_name.title().replace("_"," ") + ": ", description=description, color=discord.Color.yellow())
+        await interaction.followup.send(embed=embed)
         logging.info("after loop")
     except:
         logging.info("error")
-        embed = discord.Embed(title="Error", color=discord.Color.red())
-        await interaction.response.send_message(embed=embed)
+        embed = discord.Embed(title="Error", description="Weapon not found: " + weapon ,color=discord.Color.red())
+        await interaction.followup.send(embed=embed)
     logging.info("end of trash")
 
 #check arbi
-@tree.command(name = "arby", description = "Check current arbitration", guild=discord.Object(id=GUILD))
+@tree.command(name = "arby", description = "Check current arbitration")
 async def arby(interaction:discord.message):
     logging.info("arby start")
     url = "https://10o.io/arbitrations.json"
@@ -474,7 +566,7 @@ async def arby(interaction:discord.message):
     logging.info("arby end")
 
 #check events
-@tree.command(name = "events", description = "Check events", guild=discord.Object(id=GUILD))
+@tree.command(name = "events", description = "Check events")
 async def events(interaction:discord.message):
     logging.info("events start")
     test = requests.get('https://api.warframestat.us/PC/events/')
@@ -509,7 +601,7 @@ async def events(interaction:discord.message):
     logging.info("events end")
 
 #check sortie
-@tree.command(name = "sortie", description = "Check sortie", guild=discord.Object(id=GUILD))
+@tree.command(name = "sortie", description = "Check sortie")
 async def sortie(interaction:discord.message):
     logging.info("sortie start")
     #open required files
@@ -535,7 +627,7 @@ async def sortie(interaction:discord.message):
     logging.info("sortie end")
 
 #check teshins weekly shop for sp
-@tree.command(name = "teshin", description = "Check weekly rotating item from teshin", guild=discord.Object(id=GUILD))
+@tree.command(name = "teshin", description = "Check weekly rotating item from teshin")
 async def teshin(interaction:discord.message):
     logging.info("teshin start")
     test = requests.get('https://api.warframestat.us/pc/steelPath/')
@@ -546,7 +638,7 @@ async def teshin(interaction:discord.message):
     logging.info("teshin end")
 
 #print dispo + if it can roll ips
-@tree.command(name = "dispo", description = "Give dispo and if weapon rolls ips", guild=discord.Object(id=GUILD))
+@tree.command(name = "dispo", description = "Give dispo and if weapon rolls ips")
 async def dispo(interaction:discord.message, weapon:str):
     logging.info("dispo start")
     weapon = str(weapon).title().replace("&", "And").replace("_"," ")
@@ -718,206 +810,71 @@ async def dispo(interaction:discord.message, weapon:str):
         await interaction.response.send_message(embed=embed)
     logging.info("dispo end")
 
-#grab the data from dbs
-async def grab_from_db(db_name):
-    logging.info("start of grab_from_db")
-    #lists of data I want
-    weapon_list  = []
-    stat1_list  = []
-    stat2_list  = []
-    stat3_list  = []
-    stat4_list  = []
-    prefix_list  = []
-    stat1val_list  = []
-    stat2val_list  = []
-    stat3val_list  = []
-    stat4val_list  = []
-    user_list  = []
-    mr_list  = []
-    rollcount_list  = []
-    polarity_list  = []
-    rank_list  = []
-    price_list  = []
-    date = []
-    data_lists = [weapon_list, stat1_list, stat2_list, stat3_list, stat4_list,  stat1val_list, stat2val_list, stat3val_list, stat4val_list,prefix_list,user_list, mr_list, rollcount_list, polarity_list,rank_list,price_list,date]
-    #list of commands needed to grab data
-    sql_command_list = ["SELECT weapon FROM rivens;","SELECT stat1name FROM rivens;","SELECT stat2name FROM rivens;","SELECT stat3name FROM rivens;","SELECT stat4name FROM rivens;","SELECT stat1stats FROM rivens;","SELECT stat2stats FROM rivens;","SELECT stat3stats FROM rivens;","SELECT stat4stats FROM rivens;","SELECT prefix FROM rivens;","SELECT usernames FROM rivens;","SELECT mr FROM rivens;","SELECT rerolls FROM rivens;","SELECT polarity FROM rivens;","SELECT rank FROM rivens;","SELECT price FROM rivens;","SELECT date FROM rivens;"]
-    #run the sql commands and return the data
-    for x,y in zip(data_lists,sql_command_list):
-        con = sqlite3.connect(db_name,isolation_level=None)
-        con.execute('pragma journal_mode=wal;')
-        cur = con.cursor()
-        db = cur.execute(y)
-        db = db.fetchall()
-        for i in db:
-            x += [i]
-    logging.info("end of grab_from_db")
-    return weapon_list, stat1_list, stat2_list, stat3_list, stat4_list,  stat1val_list, stat2val_list, stat3val_list, stat4val_list,prefix_list,user_list, mr_list, rollcount_list, polarity_list,rank_list,price_list,date
-
-#rm db send to discord function
-async def print_rm(filtered,db_identifiers):
-    list_of_embeds = []
-    logging.info("start of print_rm")
-    #for every riven that was filtered
-    for x in filtered:
-        description = ""
-        identifier = re.sub("[\(\)',]","",str(filtered[x]['user'])) + re.sub("[\(\)',]","",str(filtered[x]['weapon'])) + re.sub("[\(\)',]","",str(filtered[x]['prefix'])) + re.sub("[\(\)',]","",str(filtered[x]['pos1'])) + re.sub("[\(\)',]","",str(filtered[x]['pos1val']))+re.sub("[\(\)',]","",str(filtered[x]['pos2'])) + re.sub("[\(\)',]","",str(filtered[x]['pos2val']))+re.sub("[\(\)',]","",str(filtered[x]['pos3'])) + re.sub("[\(\)',]","",str(filtered[x]['pos3val']))+re.sub("[\(\)',]","",str(filtered[x]['neg']))+re.sub("[\(\)',]","",str(filtered[x]['negval']))+ re.sub("[\(\)',]","",str(filtered[x]['mr']))+ re.sub("[\(\)',]","",str(filtered[x]['reroll']))+ re.sub("[\(\)',]","",str(filtered[x]['polarity']))+ re.sub("[\(\)',]","",str(filtered[x]['rank']))
-        #if it hasnt been sent yet
-        if str(identifier) not in str(db_identifiers):
-            #grade it
-            grades = grading_functions.get_varriants(re.sub("[\(\)',]","",str(filtered[x]['weapon'])),re.sub("[\(\)',]","",str(filtered[x]['pos1val'])),re.sub("[\(\)',]","",str(filtered[x]['pos1'])),re.sub("[\(\)',]","",str(filtered[x]['pos2val'])),re.sub("[\(\)',]","",str(filtered[x]['pos2'])),re.sub("[\(\)',]","",str(filtered[x]['pos3val'])),re.sub("[\(\)',]","",str(filtered[x]['pos3'])),re.sub("[\(\)',]","",str(filtered[x]['negval'])),re.sub("[\(\)',]","",str(filtered[x]['neg'])))
-            #seperate the grades
-            for y in grades:
-                try:
-                    pos1_color, pos_grade1_1, pos_grade1_2 = grades[y]['pos1']
-                except:
-                    pos1_color = ""
-                    pos_grade1_1 = ""
-                    pos_grade1_2 = ""
-                try:
-                    pos2_color,pos_grade2_1, pos_grade2_2 = grades[y]['pos2']
-                except:
-                    pos2_color = ""
-                    pos_grade2_1 = ""
-                    pos_grade2_2 = ""
-                try:
-                    pos3_color, pos_grade3_1, pos_grade3_2 = grades[y]['pos3']
-                except:
-                    pos3_color = ""
-                    pos_grade3_1 = ""
-                    pos_grade3_2 = ""
-                try:
-                    neg_color, neg_grade1, neg_grade2 = grades[y]['neg']
-                except:
-                    neg_color = ""
-                    neg_grade1 = ""
-                    neg_grade2 = ""
-                user = re.sub("[_]","\_",str(re.sub("[-]","\-",str(re.sub("[\(\)',]","",str(filtered[x]['user']))))))
-                description += user +  "\n"+"Date: "+ re.sub("[\(\)',]","",str(filtered[x]['date_listed'])) +"\n"+  str(grades[y]['weapon']).title() + " " + re.sub("[\(\)',]","",str(filtered[x]['prefix'])) + " " + re.sub("[\(\)',]","",str(filtered[x]['price']))+ "\n" + pos1_color+   re.sub("[\(\)',]","",str(filtered[x]['pos1']))+ " " + re.sub("[\(\)',]","",str(filtered[x]['pos1val']))+ " " + " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") "+ "\n"+ pos2_color +re.sub("[\(\)',]","",str(filtered[x]['pos2']))+ " " + re.sub("[\(\)',]","",str(filtered[x]['pos2val']))+ " " + " ("+ str(pos_grade2_1)+ "%, " + pos_grade2_2+ ") "+ "\n"+ pos3_color+re.sub("[\(\)',]","",str(filtered[x]['pos3']))+ " " + re.sub("[\(\)',]","",str(filtered[x]['pos3val']))+ " " + " ("+ str(pos_grade3_1)+ "%, " + pos_grade3_2+ ") "+ "\n"+ neg_color+re.sub("[\(\)',]","",str(filtered[x]['neg']))+ " " + re.sub("[\(\)',]","",str(filtered[x]['negval']))+ " " + " ("+ str(neg_grade1)+ "%, " + neg_grade2+ ") " + "\n"+"Mastery: " + re.sub("[\(\)',]","",str(filtered[x]['mr'])) + " Roll Count: " + re.sub("[\(\)',]","",str(filtered[x]['reroll'])) + " Polarity: " + re.sub("[\(\)',]","",str(filtered[x]['polarity'])) + " Rank: " + re.sub("[\(\)',]","",str(filtered[x]['rank']))+ "\n\n"
-                db_identifiers.add(identifier)
-            if description != "":
-                embed = discord.Embed(title="Riven Market",description=description, color=discord.Color.purple())
-                list_of_embeds.append(embed)
-    logging.info("end of print_rm")
-    return list_of_embeds
-
-#wfm db send to discord function
-async def print_wfm(filtered,db_identifiers):
-    list_of_embeds = []
-    logging.info("start of print_wfm")
-    #for every riven that was filtered
-    for x in filtered:
-        description = ""
-        identifier = re.sub("[\(\)',]","",str(filtered[x]['user'])) + re.sub("[\(\)',]","",str(filtered[x]['weapon'])) + re.sub("[\(\)',]","",str(filtered[x]['prefix'])) + re.sub("[\(\)',]","",str(filtered[x]['pos1'])) + re.sub("[\(\)',]","",str(filtered[x]['pos1val']))+re.sub("[\(\)',]","",str(filtered[x]['pos2'])) + re.sub("[\(\)',]","",str(filtered[x]['pos2val']))+re.sub("[\(\)',]","",str(filtered[x]['pos3'])) + re.sub("[\(\)',]","",str(filtered[x]['pos3val']))+re.sub("[\(\)',]","",str(filtered[x]['neg']))+re.sub("[\(\)',]","",str(filtered[x]['negval']))+ re.sub("[\(\)',]","",str(filtered[x]['mr']))+ re.sub("[\(\)',]","",str(filtered[x]['reroll']))+ re.sub("[\(\)',]","",str(filtered[x]['polarity']))+ re.sub("[\(\)',]","",str(filtered[x]['rank']))
-        #if it hasnt been sent yet
-        if str(identifier) not in str(db_identifiers):
-            #grade it
-            grades = grading_functions.get_varriants(re.sub("[\(\)',]","",str(filtered[x]['weapon'])),re.sub("[\(\)',]","",str(filtered[x]['pos1val'])),re.sub("[\(\)',]","",str(filtered[x]['pos1'])),re.sub("[\(\)',]","",str(filtered[x]['pos2val'])),re.sub("[\(\)',]","",str(filtered[x]['pos2'])),re.sub("[\(\)',]","",str(filtered[x]['pos3val'])),re.sub("[\(\)',]","",str(filtered[x]['pos3'])),re.sub("[\(\)',]","",str(filtered[x]['negval'])),re.sub("[\(\)',]","",str(filtered[x]['neg'])))
-            #seperate the grades
-            for y in grades:
-                try:
-                    pos1_color, pos_grade1_1, pos_grade1_2 = grades[y]['pos1']
-                except:
-                    pos1_color = ""
-                    pos_grade1_1 = ""
-                    pos_grade1_2 = ""
-                try:
-                    pos2_color,pos_grade2_1, pos_grade2_2 = grades[y]['pos2']
-                except:
-                    pos2_color = ""
-                    pos_grade2_1 = ""
-                    pos_grade2_2 = ""
-                try:
-                    pos3_color, pos_grade3_1, pos_grade3_2 = grades[y]['pos3']
-                except:
-                    pos3_color = ""
-                    pos_grade3_1 = ""
-                    pos_grade3_2 = ""
-                try:
-                    neg_color, neg_grade1, neg_grade2 = grades[y]['neg']
-                except:
-                    neg_color = ""
-                    neg_grade1 = ""
-                    neg_grade2 = ""
-                user = re.sub("[_]","\_",str(re.sub("[-]","\-",str(re.sub("[\(\)',]","",str(filtered[x]['user']))))))
-                description += user +  "\n"+"Date: "+ re.sub("[\(\)',]","",str(filtered[x]['date_listed'])) +"\n"+  str(grades[y]['weapon']).title() + " " + re.sub("[\(\)',]","",str(filtered[x]['prefix'])) + " " + re.sub("[\(\)',]","",str(filtered[x]['price']))+ "\n" + pos1_color+   re.sub("[\(\)',]","",str(filtered[x]['pos1']))+ " " + re.sub("[\(\)',]","",str(filtered[x]['pos1val']))+ " " + " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") "+ "\n"+ pos2_color +re.sub("[\(\)',]","",str(filtered[x]['pos2']))+ " " + re.sub("[\(\)',]","",str(filtered[x]['pos2val']))+ " " + " ("+ str(pos_grade2_1)+ "%, " + pos_grade2_2+ ") "+ "\n"+ pos3_color+re.sub("[\(\)',]","",str(filtered[x]['pos3']))+ " " + re.sub("[\(\)',]","",str(filtered[x]['pos3val']))+ " " + " ("+ str(pos_grade3_1)+ "%, " + pos_grade3_2+ ") "+ "\n"+ neg_color+re.sub("[\(\)',]","",str(filtered[x]['neg']))+ " " + re.sub("[\(\)',]","",str(filtered[x]['negval']))+ " " + " ("+ str(neg_grade1)+ "%, " + neg_grade2+ ") " + "\n"+"Mastery: " + re.sub("[\(\)',]","",str(filtered[x]['mr'])) + " Roll Count: " + re.sub("[\(\)',]","",str(filtered[x]['reroll'])) + " Polarity: " + re.sub("[\(\)',]","",str(filtered[x]['polarity'])) + " Rank: " + re.sub("[\(\)',]","",str(filtered[x]['rank']))+ "\n\n"
-                db_identifiers.add(identifier)
-            if description != "":
-                embed = discord.Embed(title="Warframe Market",description=description, color=discord.Color.blue())
-                list_of_embeds.append(embed)
-    logging.info("end of print_wfm")
-    return list_of_embeds
-
 #command to search the dbs
-@tree.command(name = "search", description = "Search db for rivens", guild=discord.Object(id=GUILD))
+@tree.command(name = "search", description = "Search db for rivens")
 async def search(interaction: discord.message, weapon:str, stat1:str, stat2:str, stat3:str,neg:str):
     await interaction.response.defer()
     embed_list = []
     logging.info("search start")
     #translate the arguments given by the user
-    arg2 = translator_search.translate(stat1)
-    arg3 = translator_search.translate(stat2)
-    arg4 = translator_search.translate(stat3)
-    arg5 = translator_search.translate(neg).replace("any","1")
-    #data input
-    neg = arg5
-    stats = [arg2, arg3, arg4]
-    weapon = str(weapon.lower()).title().replace("_", " ").replace("&", "and")
-    if weapon == "Any":
-        weapon = "1"
+    stat1 = translator_search.translate(stat1)
+    stat2 = translator_search.translate(stat2)
+    stat3 = translator_search.translate(stat3)
+    stat4 = translator_search.translate(neg)
+    weapon_name = str(weapon).lower().replace("_", " ").replace("&", "and").replace("any", "1")
     #grab the data
-    data_wfm = await grab_from_db("wfm.db")
-    data_rm = await grab_from_db("rm.db")
-    #create empty set for checking if riven was sent already
-    db_identifiers = set()
-    #pull the data out of the list
-    weapon_list = data_wfm[0]
-    stat1_list = data_wfm[1]
-    stat2_list = data_wfm[2]
-    stat3_list = data_wfm[3]
-    stat4_list = data_wfm[4]
-    stat1val_list = data_wfm[5]
-    stat2val_list = data_wfm[6]
-    stat3val_list = data_wfm[7]
-    stat4val_list = data_wfm[8]
-    prefix_list = data_wfm[9]
-    user_list = data_wfm[10]
-    mr_list = data_wfm[11]
-    rollcount_list = data_wfm[12]
-    polarity_list = data_wfm[13]
-    rank_list = data_wfm[14]
-    price_list = data_wfm[15]
-    date = data_wfm[16]
-    logging.info("before filtering wfm data")
-    #filter the data
-    filtered = await filters_search(weapon, arg2, arg3, arg4, stats, neg, weapon_list, stat1_list, stat2_list, stat3_list, stat4_list,  stat1val_list, stat2val_list, stat3val_list, stat4val_list,prefix_list,user_list, mr_list, rollcount_list, polarity_list,rank_list,price_list,date)
-    logging.info("before sending wfm rivens to be sent to discord")
+    wfm = "wfm.db"
+    rm = "rm.db"
+    #loop through the 2 dbs
+    for x in [wfm,rm]:
+        #open the db
+        con = sqlite3.connect(x,isolation_level=None)
+        con.execute('pragma journal_mode=wal;')
+        cur = con.cursor()
+        #search for the data
+        if stat4 == "" or stat4 == "1":
+            data = cur.execute("SELECT * FROM rivens WHERE weapon = ? AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?)",(weapon_name, stat1,stat1,stat1,stat2,stat2,stat2,stat3,stat3,stat3,))
+        else:
+            data = cur.execute("SELECT * FROM rivens WHERE weapon = ? AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND stat4name = ?",(weapon_name, stat1,stat1,stat1,stat2,stat2,stat2,stat3,stat3,stat3,stat4,))
+        #loop through each riven found
+        for riven in data:
+            description = ""
+            #grade each riven
+            grades = grading_functions.get_varriants(str(riven[1]).replace("_"," "), riven[9], riven[8],riven[11], riven[10], riven[13], riven[12],riven[15],riven[14])
+            #loop through the grades
+            for grade in grades:
+                    try:
+                        pos1_color, pos_grade1_1, pos_grade1_2 = grades[grade]['pos1']
+                    except:
+                        pos1_color = ""
+                        pos_grade1_1 = ""
+                        pos_grade1_2 = ""
+                    try:
+                        pos2_color,pos_grade2_1, pos_grade2_2 = grades[grade]['pos2']
+                    except:
+                        pos2_color = ""
+                        pos_grade2_1 = ""
+                        pos_grade2_2 = ""
+                    try:
+                        pos3_color, pos_grade3_1, pos_grade3_2 = grades[grade]['pos3']
+                    except:
+                        pos3_color = ""
+                        pos_grade3_1 = ""
+                        pos_grade3_2 = ""
+                    try:
+                        neg_color, neg_grade1, neg_grade2 = grades[grade]['neg']
+                    except:
+                        neg_color = ""
+                        neg_grade1 = ""
+                        neg_grade2 = ""
+                    #create username and description for the mebed
+                    user = re.sub("[_]","\_",str(re.sub("[-]","\-",str(re.sub("[\(\)',]","",str(riven[0]))))))
+                    description += user +  "\n"+"Date: "+ re.sub("[\(\)',]","",str(riven[17])) +"\n"+  str(grades[grade]['weapon']).title() + " " + re.sub("[\(\)',]","",str(riven[2])) + " " + re.sub("[\(\)',]","",str(riven[3]))+ "\n" + pos1_color+   re.sub("[\(\)',]","",str(riven[8]))+ " " + re.sub("[\(\)',]","",str(riven[9]))+ " " + " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") "+ "\n"+ pos2_color +re.sub("[\(\)',]","",str(riven[10]))+ " " + re.sub("[\(\)',]","",str(riven[11]))+ " " + " ("+ str(pos_grade2_1)+ "%, " + pos_grade2_2+ ") "+ "\n"+ pos3_color+re.sub("[\(\)',]","",str(riven[12]))+ " " + re.sub("[\(\)',]","",str(riven[13]))+ " " + " ("+ str(pos_grade3_1)+ "%, " + pos_grade3_2+ ") "+ "\n"+ neg_color+re.sub("[\(\)',]","",str(riven[14]))+ " " + re.sub("[\(\)',]","",str(riven[15]))+ " " + " ("+ str(neg_grade1)+ "%, " + neg_grade2+ ") " + "\n"+"Mastery: " + re.sub("[\(\)',]","",str(riven[5])) + " Roll Count: " + re.sub("[\(\)',]","",str(riven[7])) + " Polarity: " + re.sub("[\(\)',]","",str(riven[6])) + " Rank: " + re.sub("[\(\)',]","",str(riven[4]))+ "\n\n"
+            #if the description has anything create the embed and add it to the embed list
+            if description != "":
+                embed = discord.Embed(description=description, color=discord.Color.yellow())
+                embed_list.append(embed)
     #print the data
-    embed_list.extend(await print_wfm(filtered,db_identifiers))
-    #pulld the data out of the list
-    weapon_list = data_rm[0]
-    stat1_list = data_rm[1]
-    stat2_list = data_rm[2]
-    stat3_list = data_rm[3]
-    stat4_list = data_rm[4]
-    stat1val_list = data_rm[5]
-    stat2val_list = data_rm[6]
-    stat3val_list = data_rm[7]
-    stat4val_list = data_rm[8]
-    prefix_list = data_rm[9]
-    user_list = data_rm[10]
-    mr_list = data_rm[11]
-    rollcount_list = data_rm[12]
-    polarity_list = data_rm[13]
-    rank_list = data_rm[14]
-    price_list = data_rm[15]
-    date = data_rm[16]
-    logging.info("before filtering rm data")
-    #filter the data
-    filtered = await filters_search(weapon, arg2, arg3, arg4, stats, neg, weapon_list, stat1_list, stat2_list, stat3_list, stat4_list,  stat1val_list, stat2val_list, stat3val_list, stat4val_list,prefix_list,user_list, mr_list, rollcount_list, polarity_list,rank_list,price_list,date)
-    logging.info("before sending rm rivens to be sent to discord")
-    #print the data
-    embed_list.extend(await print_rm(filtered,db_identifiers))
     L = 1
     async def get_page(page: int):
         offset = (page-1) * L
@@ -934,71 +891,8 @@ async def search(interaction: discord.message, weapon:str, stat1:str, stat2:str,
         await Pagination(interaction, get_page).navegate()
     logging.info("end of search")
 
-#filter the data
-async def filters_search(weapon, arg2, arg3, arg4, stats, neg, weapon_list, stat1_list, stat2_list, stat3_list, stat4_list,  stat1val_list, stat2val_list, stat3val_list, stat4val_list,prefix_list,user_list, mr_list, rollcount_list, polarity_list,rank_list,price_list,date):
-    logging.info("beinging of filters_search")
-    #varrs needed
-    matches = {}
-    count = 0
-    #loop through the lists of data
-    for weapon_db, stat1, stat2, stat3, stat4, stat1val, stat2val, stat3val, stat4val, prefix, user, mr, reroll, polarity, rank, price, date_listed in zip(weapon_list, stat1_list, stat2_list, stat3_list, stat4_list,  stat1val_list, stat2val_list, stat3val_list, stat4val_list,prefix_list,user_list, mr_list, rollcount_list, polarity_list,rank_list,price_list,date):
-        #replace character with space
-        weapon_db = str(weapon_db).replace("_"," ").title()
-        #create list of pos stats
-        statsdb = [stat1[0],stat2[0],stat3[0]]
-        #filter the stats given by user with the stats in the db, (1 == any stat)
-        if str(weapon).title() in str(weapon_db).title() or weapon == "1":
-            test = all(item in statsdb for item in stats)
-            if test == True:
-                if neg in str(stat4).replace("_"," ") or neg == "1":
-                    count += 1
-                    matches.update({count:{'weapon':weapon_db,'pos1':stat1,'pos1val':stat1val,'pos2':stat2,'pos2val':stat2val,'pos3':stat3,'pos3val':stat3val,'neg':stat4,'negval':stat4val,'prefix':prefix,'user':user,'mr':mr,"reroll":reroll,"polarity":polarity,'rank':rank,'price':price,"date_listed":date_listed}})
-            elif arg2 == "1" and arg3 == "1" and arg4 == "1":
-                if neg in str(stat4).replace("_"," ") or neg == "1":
-                    count += 1
-                    matches.update({count:{'weapon':weapon_db,'pos1':stat1,'pos1val':stat1val,'pos2':stat2,'pos2val':stat2val,'pos3':stat3,'pos3val':stat3val,'neg':stat4,'negval':stat4val,'prefix':prefix,'user':user,'mr':mr,"reroll":reroll,"polarity":polarity,'rank':rank,'price':price,"date_listed":date_listed}})
-            elif arg2 != "1" and arg3 == "1" and arg4 == "1":
-                if arg2 in str(statsdb).lower():
-                    if neg in str(stat4).replace("_"," ") or neg == "1":
-                        count += 1
-                        matches.update({count:{'weapon':weapon_db,'pos1':stat1,'pos1val':stat1val,'pos2':stat2,'pos2val':stat2val,'pos3':stat3,'pos3val':stat3val,'neg':stat4,'negval':stat4val,'prefix':prefix,'user':user,'mr':mr,"reroll":reroll,"polarity":polarity,'rank':rank,'price':price,"date_listed":date_listed}})
-            elif arg2 == "1" and arg3 != "1" and arg4 == "1":
-                if arg3 in str(statsdb).lower():
-                    if neg in str(stat4).replace("_"," ") or neg == "1":
-                        count += 1
-                        matches.update({count:{'weapon':weapon_db,'pos1':stat1,'pos1val':stat1val,'pos2':stat2,'pos2val':stat2val,'pos3':stat3,'pos3val':stat3val,'neg':stat4,'negval':stat4val,'prefix':prefix,'user':user,'mr':mr,"reroll":reroll,"polarity":polarity,'rank':rank,'price':price,"date_listed":date_listed}})
-            elif arg2 == "1" and arg3 == "1" and arg4 != "1":
-                if arg4 in str(statsdb).lower():
-                    if neg in str(stat4).replace("_"," ") or neg == "1":
-                        count += 1
-                        matches.update({count:{'weapon':weapon_db,'pos1':stat1,'pos1val':stat1val,'pos2':stat2,'pos2val':stat2val,'pos3':stat3,'pos3val':stat3val,'neg':stat4,'negval':stat4val,'prefix':prefix,'user':user,'mr':mr,"reroll":reroll,"polarity":polarity,'rank':rank,'price':price,"date_listed":date_listed}})
-            elif arg2 == "1":
-                stats = [arg3, arg4]
-                test = all(item in statsdb for item in stats)
-                if test == True:
-                    if neg in str(stat4).replace("_"," ") or neg == "1":
-                        count += 1
-                        matches.update({count:{'weapon':weapon_db,'pos1':stat1,'pos1val':stat1val,'pos2':stat2,'pos2val':stat2val,'pos3':stat3,'pos3val':stat3val,'neg':stat4,'negval':stat4val,'prefix':prefix,'user':user,'mr':mr,"reroll":reroll,"polarity":polarity,'rank':rank,'price':price,"date_listed":date_listed}})
-            elif arg3 == "1":
-                stats = [arg2, arg4]
-                test = all(item in statsdb for item in stats)
-                if test == True:
-                    if neg in str(stat4).replace("_"," ") or neg == "1":
-                        count += 1
-                        matches.update({count:{'weapon':weapon_db,'pos1':stat1,'pos1val':stat1val,'pos2':stat2,'pos2val':stat2val,'pos3':stat3,'pos3val':stat3val,'neg':stat4,'negval':stat4val,'prefix':prefix,'user':user,'mr':mr,"reroll":reroll,"polarity":polarity,'rank':rank,'price':price,"date_listed":date_listed}})
-            if arg4 == "1":
-                stats = [arg2, arg3]
-                test = all(item in statsdb for item in stats)
-                if test == True:
-                    if neg in str(stat4).replace("_"," ") or neg == "1":
-                        count += 1
-                        matches.update({count:{'weapon':weapon_db,'pos1':stat1,'pos1val':stat1val,'pos2':stat2,'pos2val':stat2val,'pos3':stat3,'pos3val':stat3val,'neg':stat4,'negval':stat4val,'prefix':prefix,'user':user,'mr':mr,"reroll":reroll,"polarity":polarity,'rank':rank,'price':price,"date_listed":date_listed}})
-    logging.info("end of filteres_search")
-    #return all the rivens produced
-    return matches
-
 #add people to the blacklist
-@tree.command(name = "blacklist", description = "Add someone to the blacklist", guild=discord.Object(id=GUILD))
+@tree.command(name = "blacklist", description = "Add someone to the blacklist")
 async def blacklist(interaction: discord.message, user: str):
     logging.info("blacklist start")
     #open the file
@@ -1012,7 +906,7 @@ async def blacklist(interaction: discord.message, user: str):
     logging.info("blacklist end")
 
 #check what baro has
-@tree.command(name = "baro", description = "Check when baro is here/leaving and his inventory", guild=discord.Object(id=GUILD))
+@tree.command(name = "baro", description = "Check when baro is here/leaving and his inventory")
 async def baro(interaction: discord.message):
     logging.info("begining of baro")
     test = requests.get('https://api.warframestat.us/PC/voidTrader')
@@ -1029,7 +923,7 @@ async def baro(interaction: discord.message):
     logging.info("end of baro")
 
 #remove a filter
-@tree.command(name = "filterremove", description = "Remove a filter", guild=discord.Object(id=GUILD))
+@tree.command(name = "filterremove", description = "Remove a filter")
 async def filterremove(interaction: discord.message, filter: str):
     logging.info("filterremove start")
     #varrs needed
@@ -1081,7 +975,7 @@ async def filterremove(interaction: discord.message, filter: str):
     logging.info("filterremove end")
 
 #send all the filters to discord
-@tree.command(name = "filterlist", description = "List filters", guild=discord.Object(id=GUILD))
+@tree.command(name = "filterlist", description = "List filters")
 async def filterlist(interaction: discord.message):
     await interaction.response.defer()
     logging.info("filterlist start")
@@ -1141,7 +1035,7 @@ async def filterlist(interaction: discord.message):
     logging.info("filterlist end")
 
 #add a new filter
-@tree.command(name = "filters", description = "Add a filter", guild=discord.Object(id=GUILD))
+@tree.command(name = "filters", description = "Add a filter")
 async def filters(interaction: discord.message, weapon:str, stat1:str, stat2:str, stat3:str, neg:str):
     logging.info("filters start")
     neg_stat = ""
@@ -1182,7 +1076,7 @@ async def filters(interaction: discord.message, weapon:str, stat1:str, stat2:str
     logging.info("filters end")
 
 #search warframe.market rivens
-@tree.command(name = "searchwfm", description = "search warframe.market", guild=discord.Object(id=GUILD))
+@tree.command(name = "searchwfm", description = "search warframe.market")
 #search_wfm
 async def searchwfm(interaction: discord.message, weapon:str, stat1:str, stat2:str, stat3:str, neg:str):
     await interaction.response.defer()
@@ -1343,6 +1237,6 @@ async def searchwfm(interaction: discord.message, weapon:str, stat1:str, stat2:s
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id=GUILD))
+    await tree.sync()
     print("Ready!")
 client.run(TOKEN)

@@ -24,7 +24,6 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO, file
 
 #discord token and guild
 load_dotenv()
-os.environ.get()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
@@ -190,7 +189,6 @@ async def wfm_snipe_loop():
     logging.info('grabbed the wfm json data and put it in dict riven_data')
     # select the db
     con = sqlite3.connect("wfm.db")
-    cur = con.cursor()
 
     #filter through the data
     with open("filters.json") as json_file:
@@ -287,8 +285,8 @@ async def rm_snipe_loop():
     rm_url = "https://riven.market/_modules/riven/showrivens.php?baseurl=Lw==&platform=PC&limit=250&recency=1&veiled=false&onlinefirst=false&polarity=all&rank=all&mastery=16&weapon=Any&stats=Any&neg=Any&price=99999&rerolls=-1&sort=time&direction=ASC&page=1&time=0"
 
     r = requests.get(rm_url)
+    logging.info('requested the data')
     soup = bs4(r.content,"lxml")
-
     table = soup.find('div',attrs={"id":"riven-list"})
 
     users = []
@@ -496,10 +494,9 @@ async def wfm_snipe_loop_fast():
             wfm_search_link = "https://api.warframe.market/v1/auctions/search?type=riven"+weapon_url+stat_search+negname+"&polarity=any&sort_by=price_asc"
             logging.info("wfm_link: "+ str(wfm_search_link))
             link_list.append(wfm_search_link)
-            # filter_list.append(f)
     list_broken = [link_list[x:x+3] for x in range(0,len(link_list), 3)]
     for j in list_broken:
-        data = await asyncio.sleep(0.6, result=grequests.map(grequests.get(u) for u in j))
+        data = await asyncio.sleep(1, result=grequests.map(grequests.get(u) for u in j))
         for i in data:
             try:
                 data = dict(json.loads(i.text))
@@ -853,11 +850,7 @@ async def on_ready():
         f'{client.user} has connectred to Discord!'
         f'{guild.name}(id: {guild.id})'
     )
-    wfm_snipe_loop_fast.start()
     wfm_snipe_loop.start()
-    # rm_snipe_loop.start()
-    check_api.start()
-    rm_sss_fff_loop.start()
-    wfm_fff_sss_loop.start()
+    rm_snipe_loop.start()
     logging.info('bot intilized')
 client.run(TOKEN)

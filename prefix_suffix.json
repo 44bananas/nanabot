@@ -1,5 +1,6 @@
 {
     "Additional Combo Chance":{"prefix":"Laci","suffix":"Nus"},
+    "Fire Rate / Attack Speed":{"prefix":"Croni","suffix":"Dra"},
     "Ammo Maximum":{"prefix":"Ampi","suffix":"Bin"},
     "Damage Vs Corpus":{"prefix":"Manti","suffix":"Tron"},
     "Damage Vs Grineer":{"prefix":"Argi","suffix":"Con"},
@@ -11,6 +12,7 @@
     "Base Damage / Melee Damage":{"prefix":"Visi","suffix":"Ata"},
     "Electric Damage":{"prefix":"Vexi","suffix":"Tio"},
     "Heat Damage":{"prefix":"Igni","suffix":"Pha"},
+    "Punch Through":{"prefix":"Lexi","suffix":"Nok"},
     "Finisher Damage":{"prefix":"Exi","suffix":"Cta"},
     "Projectile Speed":{"prefix":"Conci","suffix":"Nak"},
     "Channeling Damage":{"prefix":"Para","suffix":"Um"},
@@ -18,16 +20,14 @@
     "Magazine Capacity":{"prefix":"Arma","suffix":"Tin"},
     "Channeling Efficiency":{"prefix":"Forti","suffix":"Us"},
     "Multishot":{"prefix":"Sati","suffix":"Can"},
+    "Status Chance":{"prefix":"Hexa","suffix":"Dex"},
     "Toxin Damage":{"prefix":"Toxi","suffix":"Tox"},
-    "Punch Through":{"prefix":"Lexi","suffix":"Nok"},
     "Puncture Damage":{"prefix":"Insi","suffix":"Cak"},
     "Reload Speed":{"prefix":"Feva","suffix":"Tak"},
     "Range":{"prefix":"Locti","suffix":"Tor"},
     "Slash Damage":{"prefix":"Sci","suffix":"Sus"},
-    "Status Chance":{"prefix":"Hexa","suffix":"Dex"},
     "Status Duration":{"prefix":"Deci","suffix":"Des"},
     "Recoil":{"prefix":"Zeti","suffix":"Mag"},
-    "Zoom":{"prefix":"Hera","suffix":"Lis"},
-    "Fire Rate / Attack Speed":{"prefix":"Croni","suffix":"Dra"},
-    "Critical Chance":{"prefix":"Crita","suffix":"Cron"}
+    "Critical Chance":{"prefix":"Crita","suffix":"Cron"},
+    "Zoom":{"prefix":"Hera","suffix":"Lis"}
 }
