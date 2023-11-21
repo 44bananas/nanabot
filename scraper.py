@@ -83,13 +83,13 @@ async def wfm_send_discord(weapon, prefix, start_price, bo_price, wfm_url, descr
 async def print_replace(data):
     data = str(data).replace("_", " ")
     data = str(data).replace("channeling efficiency","heavy attack efficiency")
-    data = str(data).replace("channeling damage", "intial combo")
+    data = str(data).replace("channeling damage", "initial combo")
     return data
 
 async def filter_func(weapon_name, pos_val1, pos_stat1,pos_val2, pos_stat2, pos_val3, pos_stat3,neg_val,neg_stat, negs, mr, rerolls, pol, rank, note, created, user, prefix):
     #get grades
     grades = grading_functions.get_varriants(str(weapon_name).replace("_"," "), pos_val1, pos_stat1,pos_val2, pos_stat2, pos_val3, pos_stat3,neg_val,neg_stat)
-    description = "/w " + user + " Hi, I'd like to buy your " + str(weapon_name).replace("_"," ").title() + " " + str(prefix) + " riven that you sell on warframe.market" + "\n\n"
+    description = "```/w " + user + " Hi, I'd like to buy your " + str(weapon_name).replace("_"," ").title() + " " + str(prefix) + " riven that you sell on warframe.market" + "\n\n```"
     for z in grades:
         try:
             pos1_color, pos_grade1_1, pos_grade1_2 = grades[z]['pos1']
@@ -212,7 +212,7 @@ async def wfm_snipe_loop():
                                         user = re.sub("[-]","\-",str(re.sub("[_]","\_",str(riven_data[x]['user']))))
                                         #get the grades of all varriants
                                         grades = grading_functions.get_varriants(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['pos_val1'], str(riven_data[x]['pos1']).replace("_"," "),riven_data[x]['pos_val2'], str(riven_data[x]['pos2']).replace("_"," "), riven_data[x]['pos_val3'], str(riven_data[x]['pos3']).replace("_"," "),riven_data[x]['neg_values'],str(riven_data[x]['neg']).replace("_"," "))
-                                        description = "/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on warframe.market" + "\n\n"
+                                        description = "```/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on warframe.market" + "\n\n```"
                                         #seperate the grades out
                                         for z in grades:
                                             try:
@@ -349,7 +349,7 @@ async def rm_snipe_loop():
                                                 neg_grade1 = ""
                                                 neg_grade2 = ""
                                                 user = re.sub("[-]","\-",str(re.sub("[_]","\_",str(riven_data[x]['user']).lower().strip())))
-                                                description = "/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on riven.market" + "\n\n"
+                                                description = "```/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on riven.market" + "\n\n```"
                                                 #seperate the grades out
                                                 if grades == {}:
                                                     # print(str(riven_data[x]['weapon']).replace("_"," ").title(), str(stat1name)+ " "+ str(riven_data[x]['pos_val1']), str(stat2name)+ " "+ str(riven_data[x]['pos_val2']), str(stat3name)+ " "+ str(riven_data[x]['pos_val3']), str(negstat)+ " "+ str(riven_data[x]['negval']), user)
@@ -600,7 +600,7 @@ async def check_api():
         if new_dict[x]['isHard'] == True:
             if new_dict[x]['tierNum'] == 5:
                 if "Taveuni" in new_dict[x]['node']:
-                    channel = client.get_channel(1113579506935005294)
+                    channel = client.get_channel(alerts)
                     embed = discord.Embed(description=new_dict[x]['node']  + "\nTime Left: " + new_dict[x]['eta'])
                     message = await channel.send(embed=embed)
     #check invasions
@@ -690,7 +690,7 @@ async def wfm_fff_sss_loop():
             user = re.sub("[-]","\-",str(re.sub("[_]","\_",str(riven_data[x]['user']))))
             #get the grades of all varriants
             grades = grading_functions.get_varriants(str(riven_data[x]['weapon']).replace("_"," "), riven_data[x]['pos_val1'], str(riven_data[x]['pos1']).replace("_"," "),riven_data[x]['pos_val2'], str(riven_data[x]['pos2']).replace("_"," "), riven_data[x]['pos_val3'], str(riven_data[x]['pos3']).replace("_"," "),riven_data[x]['neg_values'],str(riven_data[x]['neg']).replace("_"," "))
-            description = "/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on warframe.market" + "\n\n"
+            description = "```/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on warframe.market" + "\n\n```"
             #seperate the grades out
             for z in grades:
                 try:
@@ -789,7 +789,7 @@ async def rm_sss_fff_loop():
             neg_grade1 = ""
             neg_grade2 = ""
             user = re.sub("[-]","\-",str(re.sub("[_]","\_",str(riven_data[x]['user']).lower().strip())))
-            description = "/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on riven.market" + "\n\n"
+            description = "```/w " + user + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on riven.market" + "\n\n```"
             #seperate the grades out
             if grades == {}:
                 # print(str(riven_data[x]['weapon']).replace("_"," ").title(), str(stat1name)+ " "+ str(riven_data[x]['pos_val1']), str(stat2name)+ " "+ str(riven_data[x]['pos_val2']), str(stat3name)+ " "+ str(riven_data[x]['pos_val3']), str(negstat)+ " "+ str(riven_data[x]['negval']), user)
@@ -847,7 +847,7 @@ async def on_ready():
         if guild.name == GUILD:
             break
     print(
-        f'{client.user} has connectred to Discord!'
+        f'{client.user} has connected to Discord!'
         f'{guild.name}(id: {guild.id})'
     )
     wfm_snipe_loop.start()
