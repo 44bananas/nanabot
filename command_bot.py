@@ -44,7 +44,7 @@ tree = app_commands.CommandTree(client)
 async def veiledprices(interaction:discord.message):
     logging.info("start of veiledprices")
     #get the data
-    raw_data = requests.get("http://n9e5v4d8.ssl.hwcdn.net/repos/weeklyRivensPC.json")
+    raw_data = requests.get("https://www-static.warframe.com/repos/weeklyRivensPC.json")
     data = raw_data.json()
     #varrs needed
     dict_of_top_10 = {}
@@ -79,7 +79,7 @@ async def veiledprices(interaction:discord.message):
 async def popular(interaction:discord.message):
     logging.info("start of popular")
     #get the data
-    raw_data = requests.get("http://n9e5v4d8.ssl.hwcdn.net/repos/weeklyRivensPC.json")
+    raw_data = requests.get("https://www-static.warframe.com/repos/weeklyRivensPC.json")
     data = raw_data.json()
     dict_of_top_10 = {}
     number_top_10 = 0
@@ -158,7 +158,7 @@ async def price(interaction:discord.message, weapon:str):
                 elif "Gazal" not in weapon:
                     weapon = weapon.replace(x, "").replace("And","&")
     #get the data
-    raw_data = requests.get("http://n9e5v4d8.ssl.hwcdn.net/repos/weeklyRivensPC.json")
+    raw_data = requests.get("https://www-static.warframe.com/repos/weeklyRivensPC.json")
     data = raw_data.json()
     description = "**Prices this week:** \n\n"
     for x in data:
@@ -177,7 +177,7 @@ async def price(interaction:discord.message, weapon:str):
 async def top(interaction:discord.message):
     logging.info("start of top")
     #get the data
-    raw_data = requests.get("http://n9e5v4d8.ssl.hwcdn.net/repos/weeklyRivensPC.json")
+    raw_data = requests.get("https://www-static.warframe.com/repos/weeklyRivensPC.json")
     data = raw_data.json()
     dict_of_top_10 = {}
     number_top_10 = 0
