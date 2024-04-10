@@ -100,6 +100,40 @@ translates_wfm_search = {
     "z":"zoom"
 }
 
+riven_tc = {
+    "damage":"base damage / melee damage",
+    "melee damage":"base damage / melee damage",
+    "critical chance (x2 for heavy attack)":"critical chance",
+    "critical chance(x2 for heavy attack)":"critical chance",
+    "critical chance":"critical chance",
+    "critical damage":"critical damage",
+    "attack speed":"fire rate / attack speed",
+    "fire rate (x2 for bows)":"fire rate / attack speed",
+    "fire rate(x2 for bows)":"fire rate / attack speed",
+    "initial combo":"channeling damage",
+    "weapon recoil":"recoil",
+    "toxin":"toxin damage",
+    "cold":"cold damage",
+    "electricity":"electric damage",
+    "heat":"heat damage",
+    "critical chance for slide attack":"critical chance on slide attack",
+    "finisher damage":"finisher damage",
+    "damage to grineer":"damage vs grineer",
+    "damage to infested":"damage vs infested",
+    "damage to corpus":"damage vs corpus",
+    "ammo maximum":"ammo maximum",
+    "impact":"impact damage",
+    "puncture":"puncture damage",
+    "slash":"slash damage",
+    "magazine capacity":"magazine capacity",
+    "punch through":"punch through",
+    "status chance":"status chance",
+    "status duration":"status duration",
+    "heavy attack efficiency":"channeling efficiency",
+    "reload speed":"reload speed",
+    "projectile speed":"projectile speed"
+}
+
 riven_img = {
     "impact damage":"Impact",
     "slash damage":"Slash",
@@ -124,6 +158,14 @@ riven_img_rifle = {
 riven_img_melee = {
     "critical chance":"Critical Chance (x2 for Heavy Attacks)"
 }
+
+def translate_riven_tc(stat):
+    if stat.strip().lower() in riven_tc:
+        for key, value in riven_tc.items():
+            if stat.strip().lower() in key:
+                return value
+    else:
+        return stat.lower()
 
 def translate_riven_img_rifle(stat):
     if stat.lower() in riven_img_rifle:

@@ -25,6 +25,8 @@ import random
 from PIL import Image, ImageFont, ImageDraw
 import io
 from pagination_file_send import Pagination_file_send
+import bane_patch
+import grab_info_from_wfm
 
 #discord token and guild
 load_dotenv()
@@ -208,6 +210,32 @@ async def top(interaction:discord.message):
     await interaction.response.send_message(embed=embed)
     logging.info("end of top")
 
+#wfm profile command
+@tree.command(name = "wfm_img", description="Generate image of rivens listed on someones wfm profile")
+async def wfm_img(interaction:discord.message, user:str):
+    await interaction.response.defer()
+    try:
+            riven_images = [grab_info_from_wfm.start(user)]
+    except:
+        logging.info("ign wrong")
+        embed = discord.Embed(title="Name not Found", color=discord.Color.red())
+        await interaction.followup.send(embed=embed)
+    #cycle through riven images with buttons n shit
+    L = 1
+    async def get_page(page: int):
+        offset = (page-1) * L
+        # riven_images = riven_images.values()
+        for x in riven_images[offset:offset+L]:
+            image = x
+            image.save("riven_image" + str(offset) + ".png")
+            embed = discord.Embed(title = user)
+            file = discord.File("riven_image"+str(offset) + ".png", filename="image.png")
+            embed.set_image(url="attachment://image.png")
+        n = Pagination_file_send.compute_total_pages(len(riven_images), L)
+        embed.set_footer(text=f"Riven {page} of {n}")
+        return embed, n, file
+    await Pagination_file_send(interaction, get_page).navegate()
+
 #rolls command
 @tree.command(name = "rolls", description="Check rolls for a weapon")
 async def rolls(interaction:discord.message, weapon:str):
@@ -279,6 +307,7 @@ async def wfm_grade(interaction:discord.message,url :str):
         else:
             pos_stat_3 = []
             pos_stat_3val = []
+        pos_stat_1val, pos_stat_2val, pos_stat_3val, neg_values = bane_patch.front_to_back(pos_stat_1, pos_stat_1val), bane_patch.front_to_back(pos_stat_2, pos_stat_2val), bane_patch.front_to_back(pos_stat_3, pos_stat_3val), bane_patch.front_to_back(neg_stats, neg_values)
         logging.info("after grabbing data")
         riven_data.update({"weapon":data['item']['weapon_url_name'], "pos1stat":pos_stat_1,"pos1val":pos_stat_1val, "pos2stat":pos_stat_2,"pos2val":pos_stat_2val, "pos3stat":pos_stat_3,"pos3val":pos_stat_3val, "negstat":neg_stats, "negval":neg_values,"rerolls":data['item']['re_rolls'],"pol":data['item']['polarity'],"mr":data['item']['mastery_level']})
     logging.info("before generating image")
@@ -304,21 +333,18 @@ async def wfm_grade(interaction:discord.message,url :str):
     logging.info("end of wfm_grade")
 
 #give me riven img given stats
-@tree.command(name = "img_create", description = "imgcreate")
-async def img_create(interaction:discord.message, weapon:str,stat1:str,stat1val:str, stat2:str,stat2val:str, stat3:str,stat3val:str,neg:str,negval:str,rerolls:typing.Optional[int]=random.randrange(0,1111),mr:typing.Optional[int]=random.randrange(8,16),polarity: typing.Optional[str]=random.choice(["naramon","vazarin","madurai"])):
-    logging.info("start of img_create")
+@tree.command(name = "bgrade", description = "banana grading")
+async def bgrade(interaction:discord.message, weapon:str,stat1:str,stat1val:str, stat2:str,stat2val:str, stat3:typing.Optional[str]='[]',stat3val:typing.Optional[str]='[]',neg:typing.Optional[str]='[]',negval:typing.Optional[str]='[]',rerolls:typing.Optional[int]=random.randrange(0,1111),mr:typing.Optional[int]=random.randrange(8,16),polarity: typing.Optional[str]=random.choice(["naramon","vazarin","madurai"])):
+    logging.info("start of bgrade")
     embed_list = []
     files = []
     await interaction.response.defer()
     weapon = weapon.title()
     stat1name_raw = translator_search.translate(stat1).title()
-    stat1stat = float(stat1val)
     stat2name_raw = translator_search.translate(stat2).title()
-    stat2stat = float(stat2val)
     stat3name_raw = translator_search.translate(stat3).title()
-    stat3stat = float(stat3val)
     negname_raw = translator_search.translate(neg).title()
-    negstat = float(negval)
+    stat1stat, stat2stat, stat3stat, negstat = bane_patch.front_to_back(stat1name_raw.lower(), float(stat1val)) if stat1val != "[]" else stat1val, bane_patch.front_to_back(stat2name_raw.lower(), float(stat2val)) if stat2val != "[]" else stat2val, bane_patch.front_to_back(stat3name_raw.lower(), float(stat3val)) if stat3val != "[]" else stat3val, bane_patch.front_to_back(negname_raw.lower(), float(negval)) if negval != "[]" else negval
     pol = polarity.lower()
     logging.info("before generating image")
     riven_images = riven_img_dynamic.riven_img(weapon, stat1name_raw, stat1stat, stat2name_raw, stat2stat, stat3name_raw, stat3stat, negname_raw, negstat, pol, rerolls, mr)
@@ -340,11 +366,11 @@ async def img_create(interaction:discord.message, weapon:str,stat1:str,stat1val:
         return embed, n, file
     logging.info("before sending to discord")
     await Pagination_file_send(interaction, get_page).navegate()
-    logging.info("end of img_create")
+    logging.info("end of bgrade")
 
 #give me riven prefix name given stats
 @tree.command(name = "prefixes", description = "Give the riven prefix names")
-async def prefixes(interaction:discord.message, stat1:str, stat2:str, stat3:str):
+async def prefixes(interaction:discord.message, stat1:str, stat2:typing.Optional[str]='', stat3:typing.Optional[str]=''):
     logging.info("start of prefixes")
     #if stat from user = 1 then set it to none
     if stat1 == "1":
@@ -498,14 +524,6 @@ async def unroll(interaction:discord.message, weapon:str):
         embed = discord.Embed(title="Error", color=discord.Color.red())
         await interaction.followup.send(embed=embed)
     logging.info("end of unroll")
-
-#folf command
-@tree.command(name = "folf", description = "woof")
-async def folf(interaction:discord.message):
-    logging.info("begining of folf")
-    embed = discord.Embed(title="FLUFFFLUFFLOOFFLORFLFLFOLROFLFOFLFORLFOFL", color=discord.Color.blue())
-    await interaction.response.send_message(embed=embed)
-    logging.info("end of folf")
 
 #trash search wfm
 @tree.command(name = "trash", description = "Grab 10 cheapest rivens for a given weapon")
@@ -810,9 +828,24 @@ async def dispo(interaction:discord.message, weapon:str):
         await interaction.response.send_message(embed=embed)
     logging.info("dispo end")
 
+#command to get number of rivens in db
+@tree.command(name="riven_count", description="Number of Rivens in Database")
+async def riven_count(interaction:discord.message):
+    await interaction.response.defer()
+    description = ""
+    for x in ["wfm.db","rm.db"]:
+        #open the db
+        con = sqlite3.connect(x,isolation_level=None)
+        con.execute('pragma journal_mode=wal;')
+        cur = con.cursor()
+        description += x + "\n" + str(len(cur.execute("SELECT * FROM rivens").fetchall())) + "\n\n"
+    #send it to discord
+    embed = discord.Embed(title="Number of Rivens", description=description, color=discord.Color.yellow())
+    await interaction.followup.send(embed=embed)
+
 #command to search the dbs
 @tree.command(name = "search", description = "Search db for rivens")
-async def search(interaction: discord.message, weapon:str, stat1:str, stat2:str, stat3:str,neg:str):
+async def search(interaction: discord.message, weapon:str, stat1:str, stat2:str, stat3:typing.Optional[str]='[]',neg:typing.Optional[str]='[]'):
     await interaction.response.defer()
     embed_list = []
     logging.info("search start")
@@ -832,7 +865,9 @@ async def search(interaction: discord.message, weapon:str, stat1:str, stat2:str,
         con.execute('pragma journal_mode=wal;')
         cur = con.cursor()
         #search for the data
-        if stat4 == "" or stat4 == "1":
+        if stat4 == "any":
+            data = cur.execute("SELECT * FROM rivens WHERE weapon = ? AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND stat4name != ?",(weapon_name, stat1,stat1,stat1,stat2,stat2,stat2,stat3,stat3,stat3,"[]",))
+        elif stat4 == "" or stat4 == "1":
             data = cur.execute("SELECT * FROM rivens WHERE weapon = ? AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?)",(weapon_name, stat1,stat1,stat1,stat2,stat2,stat2,stat3,stat3,stat3,))
         else:
             data = cur.execute("SELECT * FROM rivens WHERE weapon = ? AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND (stat1name = ? OR stat2name = ? OR stat3name = ?) AND stat4name = ?",(weapon_name, stat1,stat1,stat1,stat2,stat2,stat2,stat3,stat3,stat3,stat4,))
@@ -867,9 +902,9 @@ async def search(interaction: discord.message, weapon:str, stat1:str, stat2:str,
                         neg_color = ""
                         neg_grade1 = ""
                         neg_grade2 = ""
-                    #create username and description for the mebed
+                    #create username and description for the embed
                     user = re.sub("[_]","\_",str(re.sub("[-]","\-",str(re.sub("[\(\)',]","",str(riven[0]))))))
-                    description += user +  "\n"+"Date: "+ re.sub("[\(\)',]","",str(riven[17])) +"\n"+  str(grades[grade]['weapon']).title() + " " + re.sub("[\(\)',]","",str(riven[2])) + " " + re.sub("[\(\)',]","",str(riven[3]))+ "\n" + pos1_color+   re.sub("[\(\)',]","",str(riven[8]))+ " " + re.sub("[\(\)',]","",str(riven[9]))+ " " + " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") "+ "\n"+ pos2_color +re.sub("[\(\)',]","",str(riven[10]))+ " " + re.sub("[\(\)',]","",str(riven[11]))+ " " + " ("+ str(pos_grade2_1)+ "%, " + pos_grade2_2+ ") "+ "\n"+ pos3_color+re.sub("[\(\)',]","",str(riven[12]))+ " " + re.sub("[\(\)',]","",str(riven[13]))+ " " + " ("+ str(pos_grade3_1)+ "%, " + pos_grade3_2+ ") "+ "\n"+ neg_color+re.sub("[\(\)',]","",str(riven[14]))+ " " + re.sub("[\(\)',]","",str(riven[15]))+ " " + " ("+ str(neg_grade1)+ "%, " + neg_grade2+ ") " + "\n"+"Mastery: " + re.sub("[\(\)',]","",str(riven[5])) + " Roll Count: " + re.sub("[\(\)',]","",str(riven[7])) + " Polarity: " + re.sub("[\(\)',]","",str(riven[6])) + " Rank: " + re.sub("[\(\)',]","",str(riven[4]))+ "\n\n"
+                    description += user +  "\n"+"Date: "+ re.sub("[\(\)',]","",str(riven[17])) +"\n"+  str(grades[grade]['weapon']).title() + " " + re.sub("[\(\)',]","",str(riven[2])) + " " + re.sub("[\(\)',]","",str(riven[3]))+ "\n" + pos1_color+   re.sub("[\(\)',]","",str(riven[8]))+ " " + re.sub("[\(\)',]","",str(bane_patch.back_to_front(riven[8], riven[9])))+ " " + " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") "+ "\n"+ pos2_color +re.sub("[\(\)',]","",str(riven[10]))+ " " + re.sub("[\(\)',]","",str(bane_patch.back_to_front(riven[10], riven[11])))+ " " + " ("+ str(pos_grade2_1)+ "%, " + pos_grade2_2+ ") "+ "\n"+ pos3_color+re.sub("[\(\)',]","",str(riven[12]))+ " " + re.sub("[\(\)',]","",str(bane_patch.back_to_front(riven[12], riven[13])))+ " " + " ("+ str(pos_grade3_1)+ "%, " + pos_grade3_2+ ") "+ "\n"+ neg_color+re.sub("[\(\)',]","",str(riven[14]))+ " " + re.sub("[\(\)',]","",str(bane_patch.back_to_front(riven[14], riven[15])))+ " " + " ("+ str(neg_grade1)+ "%, " + neg_grade2+ ") " + "\n"+"Mastery: " + re.sub("[\(\)',]","",str(riven[5])) + " Roll Count: " + re.sub("[\(\)',]","",str(riven[7])) + " Polarity: " + re.sub("[\(\)',]","",str(riven[6])) + " Rank: " + re.sub("[\(\)',]","",str(riven[4]))+ "\n\n"
             #if the description has anything create the embed and add it to the embed list
             if description != "":
                 embed = discord.Embed(description=description, color=discord.Color.yellow())
@@ -1036,7 +1071,7 @@ async def filterlist(interaction: discord.message):
 
 #add a new filter
 @tree.command(name = "filters", description = "Add a filter")
-async def filters(interaction: discord.message, weapon:str, stat1:str, stat2:str, stat3:str, neg:str):
+async def filters(interaction: discord.message, weapon:str, stat1:str, stat2:str, stat3:typing.Optional[str]="1", neg:typing.Optional[str]="1"):
     logging.info("filters start")
     neg_stat = ""
     #open the filters
@@ -1078,7 +1113,7 @@ async def filters(interaction: discord.message, weapon:str, stat1:str, stat2:str
 #search warframe.market rivens
 @tree.command(name = "searchwfm", description = "search warframe.market")
 #search_wfm
-async def searchwfm(interaction: discord.message, weapon:str, stat1:str, stat2:str, stat3:str, neg:str):
+async def searchwfm(interaction: discord.message, weapon:typing.Optional[str]="1", stat1:typing.Optional[str]="", stat2:typing.Optional[str]="", stat3:typing.Optional[str]="", neg:typing.Optional[str]="1"):
     await interaction.response.defer()
     L = 1
     logging.info("searchwfm start")
@@ -1130,13 +1165,18 @@ async def searchwfm(interaction: discord.message, weapon:str, stat1:str, stat2:s
     logging.info("searchwfm link creation")
     wfm_search_link = "https://api.warframe.market/v1/auctions/search?type=riven"+weapon+stat_search+negname+"&polarity=any&sort_by=price_asc"
     #url to grab from
-    data = requests.get(wfm_search_link)
+    header = {"Host":"api.warframe.market"}
+    data = requests.get(wfm_search_link, headers = header)
     #make it dict
     data = dict(data.json())
     count = 0
     embed_list = []
     # try:
     logging.info("searchwfm start of loop of data")
+    if data == {'error': {'weapon_url_name': ['app.auctions.errors.item_not_exist'], 'negative_stats': ['app.form.invalid']}}:
+        embed = discord.Embed(title="You can't search nothing!", color=discord.Color.yellow())
+        await interaction.followup.send(embed=embed)
+        return
     #loop through each riven
     for x in data['payload']['auctions']:
         #check if its a pc riven
@@ -1152,22 +1192,22 @@ async def searchwfm(interaction: discord.message, weapon:str, stat1:str, stat2:s
             try: 
                 pos_stat3 = str(pos_stats[2]['url_name']).replace("_"," ")
             except:
-                pos_stat3 = ""
+                pos_stat3 = "[]"
             try:
                 pos_val3 = str(pos_stats[2]['value'])
             except:
-                pos_val3 = ""
+                pos_val3 = "[]"
             #grab the neg stats
             neg_stats = [item for item in x['item']['attributes'] if item['positive'] == False]
             #sepearte the value and stat name
             try:
                 neg_stat = str(neg_stats[0]['url_name']).replace("_"," ")
             except:
-                neg_stat = ""
+                neg_stat = "[]"
             try:
                 neg_val = str(neg_stats[0]['value'])
             except:
-                neg_val = ""
+                neg_val = "[]"
             #grab the rest of the data
             created = str(int(time.mktime(parser.parse(x['created']).timetuple()))-14400)
             weapon_name = x['item']['weapon_url_name']
@@ -1178,7 +1218,6 @@ async def searchwfm(interaction: discord.message, weapon:str, stat1:str, stat2:s
             user = x['owner']['ingame_name']
             start_price = x['starting_price']
             bo_price = x['buyout_price']
-            description_note = x['note']
             mr = x['item']['mastery_level']
             rank = x['item']['mod_rank']
             pol = x['item']['polarity']
