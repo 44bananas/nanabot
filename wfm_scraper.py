@@ -15,7 +15,6 @@ from dotenv import load_dotenv
 from discord import Color
 import logging
 import translator_search
-from bs4 import BeautifulSoup as bs4
 import asyncio
 import bane_patch
 
@@ -29,7 +28,6 @@ GUILD = os.getenv('DISCORD_GUILD')
 #channel ids
 snipe = int(os.getenv('snipe'))
 bl = int(os.getenv('bl'))
-alerts = int(os.getenv('alerts'))
 funni_grades = int(os.getenv('funni_grades'))
 
 #declare discord intents
@@ -192,7 +190,7 @@ async def wfm_snipe_loop_fast():
                                         neg_color, neg_grade1, neg_grade2 = grades[z]['neg']
                                     except:
                                         neg_color, neg_grade1, neg_grade2 = "", "", ""
-                                    pos_stat1, pos_stat2, pos_stat3, neg_stat = pos_stat1.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), pos_stat2.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), pos_stat3.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), neg_stat.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo")
+                                    pos_stat1, pos_stat2, pos_stat3, neg_stat = pos_stat1.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), pos_stat2.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), pos_stat3.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), neg_stat.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo")
                                     pos_val1, pos_val2, pos_val3, neg_val = bane_patch.back_to_front(pos_stat1, pos_val1), bane_patch.back_to_front(pos_stat2, pos_val2), bane_patch.back_to_front(pos_stat3, pos_val3), bane_patch.back_to_front(neg_stat, neg_val)
                                     description += str(grades[z]['weapon']).title() + " "+"\n" +pos1_color+ pos_stat1+ " "+ pos_val1+ " "+ " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") " + " \n"+pos2_color+ pos_stat2+ " "+ pos_val2 + " "+ " ("+str(pos_grade2_1)+ "%, "+ pos_grade2_2+ ") " + " \n"+pos3_color+ pos_stat3+ " "+ pos_val3+ " "+   " ("+str(pos_grade3_1)+ "%, "+ pos_grade3_2 + ") " +" \n"+neg_color+ neg_stat+ " "+ neg_val + " "+" ("+str(neg_grade1)+ "%, "+ neg_grade2 + ")\n" + "\n"
                                 description +="Mastery: **" + str(mr) + "** Roll Count: **" + str(rerolls) + "** Polarity: **" + pol + "** Rank: **" + str(rank) + "**"
@@ -323,7 +321,7 @@ async def wfm_snipe_loop():
                                         neg_color, neg_grade1, neg_grade2 = grades[z]['neg']
                                     except:
                                         neg_color, neg_grade1, neg_grade2 = "", "", ""
-                                    pos1, pos2, pos3, neg = str(riven_data[x]['pos1']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), str(riven_data[x]['pos2']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), str(riven_data[x]['pos3']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), str(riven_data[x]['neg']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo")
+                                    pos1, pos2, pos3, neg = str(riven_data[x]['pos1']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), str(riven_data[x]['pos2']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), str(riven_data[x]['pos3']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), str(riven_data[x]['neg']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo")
                                     riven_data[x]['pos_val1'], riven_data[x]['pos_val2'], riven_data[x]['pos_val3'], riven_data[x]['neg_values'] = bane_patch.back_to_front(riven_data[x]['pos1'], riven_data[x]['pos_val1']), bane_patch.back_to_front(riven_data[x]['pos2'], riven_data[x]['pos_val2']),bane_patch.back_to_front(riven_data[x]['pos3'], riven_data[x]['pos_val3']), bane_patch.back_to_front(riven_data[x]['neg'], riven_data[x]['neg_values'])  
                                     #add grades to the varriable
                                     description += str(grades[z]['weapon']).title() + " "+"\n" +pos1_color+ pos1+ " "+ str(riven_data[x]['pos_val1'])+ " "+ " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") " + " \n"+pos2_color+ pos2+ " "+ str(riven_data[x]['pos_val2']) + " "+ " ("+str(pos_grade2_1)+ "%, "+ pos_grade2_2+ ") " + " \n"+pos3_color+ pos3+ " "+ str(riven_data[x]['pos_val3'])+ " "+   " ("+str(pos_grade3_1)+ "%, "+ pos_grade3_2 + ") " +" \n"+neg_color+ neg+ " "+ str(riven_data[x]['neg_values']) + " "+" ("+str(neg_grade1)+ ", "+ neg_grade2 + ")\n" + "\n"
@@ -420,7 +418,6 @@ async def grade_loop():
                 description = "/w " + re.sub("[-]","\-",str(re.sub("[_]","\_",str(riven_data[x]['user'])))) + " Hi, I'd like to buy your " + str(riven_data[x]['weapon']).title().replace("_"," ") + " " + str(riven_data[x]['prefix']) + " riven that you sell on warframe.market" + "\n\n"
                 has_sss = False
                 has_fff = False
-                has_aaa = False
                 for z in grades:
                     try:
                         pos1_color, pos_grade1_1, pos_grade1_2 = grades[z]['pos1']
@@ -438,11 +435,11 @@ async def grade_loop():
                         neg_color, neg_grade1, neg_grade2 = grades[z]['neg']
                     except:
                         neg_color, neg_grade1, neg_grade2 = "", "", ""
-                    pos1, pos2, pos3, neg = str(riven_data[x]['pos1']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), str(riven_data[x]['pos2']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), str(riven_data[x]['pos3']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), str(riven_data[x]['neg']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo")
+                    pos1, pos2, pos3, neg = str(riven_data[x]['pos1']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), str(riven_data[x]['pos2']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), str(riven_data[x]['pos3']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), str(riven_data[x]['neg']).replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo")
                     description += str(grades[z]['weapon']).title() + " "+"\n" +pos1_color+ pos1+ " "+ str(riven_data[x]['pos_val1'])+ " "+ " ("+ str(pos_grade1_1)+ "%, " + pos_grade1_2+ ") " + " \n"+pos2_color+ pos2+ " "+ str(riven_data[x]['pos_val2']) + " "+ " ("+str(pos_grade2_1)+ "%, "+ pos_grade2_2+ ") " + " \n"+pos3_color+ pos3+ " "+ str(riven_data[x]['pos_val3'])+ " "+   " ("+str(pos_grade3_1)+ "%, "+ pos_grade3_2 + ") " +" \n"+neg_color+ neg+ " "+ str(riven_data[x]['neg_values']) + " "+" ("+str(neg_grade1)+ ", "+ neg_grade2 + ")\n" + "\n"
-                    if pos_grade1_2 == "F grade" and pos_grade2_2 == "F grade" and pos_grade3_2 == "F grade" and neg_grade2 == "F grade":
+                    if pos_grade1_2 == "F grade" and pos_grade2_2 == "F grade" and pos_grade3_2 == "F grade":
                         has_fff = True
-                    if pos_grade1_2 == "S grade" and pos_grade2_2 == "S grade" and pos_grade3_2 == "S grade" and neg_grade2 == "S grade":
+                    if pos_grade1_2 == "S grade" and pos_grade2_2 == "S grade" and pos_grade3_2 == "S grade":
                         has_sss = True
                 if has_fff == True or has_sss == True:
                     channel = client.get_channel(funni_grades)
@@ -459,7 +456,7 @@ async def on_ready():
         if guild.name == GUILD:
             break
     print(
-        f'{client.user} has connectred to Discord!'
+        f'{client.user} has connected to Discord!'
         f'{guild.name}(id: {guild.id})'
     )
     grade_loop.start()

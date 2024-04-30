@@ -123,7 +123,7 @@ async def rm_snipe_loop():
                                         except:
                                             neg_color, neg_grade1, neg_grade2 = "", "", ""
                                         try:
-                                            stat1name, stat2name, stat3name, negstat = stat1name.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), stat2name.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), stat3name.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo"), negstat.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "intial combo")
+                                            stat1name, stat2name, stat3name, negstat = stat1name.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), stat2name.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), stat3name.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo"), negstat.replace("_", " ").replace("channeling efficiency","heavy attack efficiency").replace("channeling damage", "initial combo")
                                         except:
                                             logging.info("name changing failed in grade loop")
                                         description += str(grades[z]['weapon']).title() + " "+"\n"+pos1_color + str(stat1name)+ " "+ str(bane_patch.back_to_front(str(stat1name),str(riven_data[x]['pos_val1'])))+ " "+ " ("+ str(pos_grade1_1)+ "%, " + str(pos_grade1_2)+ ") " + " \n"+pos2_color+ str(stat2name)+ " "+ str(bane_patch.back_to_front(str(stat2name),str(riven_data[x]['pos_val2']))) + " "+ " ("+str(pos_grade2_1)+ "%, "+ str(pos_grade2_2)+ ") " + " \n"+pos3_color+ str(stat3name)+ " "+ str(bane_patch.back_to_front(str(stat3name),str(riven_data[x]['pos_val3'])))+ " "+   " ("+str(pos_grade3_1)+ "%, "+ str(pos_grade3_2) + ") " +" \n"+neg_color+ str(negstat)+ " "+ str(bane_patch.back_to_front(str(negstat),str(riven_data[x]['negval']))) + " "+" ("+str(neg_grade1)+ "%, "+ str(neg_grade2) + ")\n" + "\n"
@@ -161,7 +161,7 @@ async def on_ready():
         if guild.name == GUILD:
             break
     print(
-        f'{client.user} has connectred to Discord!'
+        f'{client.user} has connected to Discord!'
         f'{guild.name}(id: {guild.id})'
     )
     rm_snipe_loop.start()
