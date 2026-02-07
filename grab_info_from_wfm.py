@@ -18,7 +18,7 @@ def start(user):
         global base_print_value
         global print_value
         price = str(price)
-        weapon = weapon.title().replace("_"," ")
+        weapon = weapon.lower().replace("dark_split_sword_(dual_swords)","dark_split-sword").title().replace("_"," ")
         prefix = prefix.title()
         stat1stat = pos_stats["pos0_vals"]
         stat2stat = pos_stats["pos1_vals"]
@@ -66,14 +66,16 @@ def start(user):
         if negname_raw == []:
             negname_raw = "[]"
         #open dispos
-        with open("melee_dispos.txt") as json_file:
-            melee_dispos = json.load(json_file)
-        with open("archgun_dispos.txt") as json_file:
-            archgun_dispos = json.load(json_file)
-        with open("rifle_dispos.txt") as json_file:
-            rifle_dispos = json.load(json_file)
-        with open("shotgun_dispos.txt") as json_file:
-            shotgun_dispos = json.load(json_file)
+        with open("weapon_info.json") as json_file:
+            weapon_info = json.load(json_file)
+        # with open("melee_dispos.txt") as json_file:
+        #     melee_dispos = json.load(json_file)
+        # with open("archgun_dispos.txt") as json_file:
+        #     archgun_dispos = json.load(json_file)
+        # with open("rifle_dispos.txt") as json_file:
+        #     rifle_dispos = json.load(json_file)
+        # with open("shotgun_dispos.txt") as json_file:
+        #     shotgun_dispos = json.load(json_file)
         #open images used
         mad = Image.open("madaurai.png")
         vaz = Image.open("vazarin.png")
@@ -226,18 +228,20 @@ def start(user):
             #write weapon name centered
             draw.text(((W-w)/2, 215), line2, font=name_font, fill=(171, 136, 204))
         #loop through and replace fr/as and dmg/melee dmg
-        stat1name, stat2name, stat3name, negname = ["Fire Rate" if stat.lower() == "fire rate / attack speed" and weapon.title() not in melee_dispos else "Attack Speed" if stat.lower() == "fire rate / attack speed" and weapon.title() in melee_dispos else stat for stat in ["Damage" if stat.lower() == "base damage / melee damage" and weapon.title() not in melee_dispos else "Melee Damage" if stat.lower() == "base damage / melee damage" and weapon.title() in melee_dispos else stat for stat in [stat1name_raw, stat2name_raw, stat3name_raw, negname_raw]]]
+        stat1name, stat2name, stat3name, negname = ["Fire Rate" if stat.lower() == "fire rate / attack speed" and weapon_info[weapon.title()]['type'] != "melee" else "Attack Speed" if stat.lower() == "fire rate / attack speed" and weapon_info[weapon.title()]['type'] == "melee" else stat for stat in ["Damage" if stat.lower() == "base damage / melee damage" and weapon_info[weapon.title()]['type'] != "melee" else "Melee Damage" if stat.lower() == "base damage / melee damage" and weapon_info[weapon.title()]['type'] == "melee" else stat for stat in [stat1name_raw, stat2name_raw, stat3name_raw, negname_raw]]]
         #translate stat names
         stat1name = translator_search.translate_riven_img(stat1name)
         stat2name = translator_search.translate_riven_img(stat2name)
         stat3name = translator_search.translate_riven_img(stat3name)
         negname = translator_search.translate_riven_img(negname)
         #check if rifle/melee so it can add (x2 for ***)
-        if weapon.title() in str(melee_dispos):
+        if weapon_info[weapon.title()]['type'] == "melee":
+        # if weapon.title() in str(melee_dispos):
             stat1name = translator_search.translate_riven_img_melee(stat1name)
             stat2name = translator_search.translate_riven_img_melee(stat2name)
             stat3name = translator_search.translate_riven_img_melee(stat3name)
-        if weapon.title() in str(archgun_dispos) or weapon.title() in str(rifle_dispos) or weapon.title() in str(shotgun_dispos):
+        if weapon_info[weapon.title()]['type'] != "melee":
+        # if weapon.title() in str(archgun_dispos) or weapon.title() in str(rifle_dispos) or weapon.title() in str(shotgun_dispos):
             stat1name = translator_search.translate_riven_img_rifle(stat1name)
             stat2name = translator_search.translate_riven_img_rifle(stat2name)
             stat3name = translator_search.translate_riven_img_rifle(stat3name)
@@ -300,32 +304,38 @@ def start(user):
 def retrieve_rivens(data):
     rivens = {}
     for riven in data["payload"]["auctions"]:
-        positive_stats = []
-        positive_vals = []
-        negative_stats = []
-        negative_vals = []
-        rolls = riven["item"]["re_rolls"]
-        mr = riven["item"]["mastery_level"]
-        riv_name = riven["item"]["name"]
-        pol = riven["item"]["polarity"]
-        weap_name = riven["item"]["weapon_url_name"]
-        if riven["buyout_price"] == None:
-            price = riven["starting_price"]
-        else:
-            price = riven["buyout_price"]
-        stats = {}
-        count = 0
-        for stat in riven["item"]["attributes"]:
-            if stat["positive"] == True:
-                stats.update({f"pos{count}_stats":stat['url_name'],f"pos{count}_vals":stat['value']})
-                positive_stats.append(stat['url_name'])
-                positive_vals.append(stat['value'])
-                count += 1
-            elif stat["positive"] == False:
-                negative_stats.append(stat['url_name'])
-                negative_vals.append(stat['value'])
-        try:
-            rivens.update({riven["id"]:{"weapon":weap_name,"riven_name":riv_name,"rerolls":rolls,"mastery":mr,"polarity":pol,"price":price,"pos_stats":stats,"neg_stat":negative_stats[0],"neg_val":negative_vals[0]}})
-        except:
-            rivens.update({riven["id"]:{"weapon":weap_name,"riven_name":riv_name,"rerolls":rolls,"mastery":mr,"polarity":pol,"price":price,"pos_stats":stats,"neg_stat":negative_stats,"neg_val":negative_vals}})
+        if riven['is_marked_for'] != "removing":
+            positive_stats = []
+            positive_vals = []
+            negative_stats = []
+            negative_vals = []
+            rolls = riven["item"]["re_rolls"]
+            mr = riven["item"]["mastery_level"]
+            riv_name = riven["item"]["name"]
+            pol = riven["item"]["polarity"]
+            if "ax_52" in riven["item"]["weapon_url_name"]:
+                weap_name = "ax-52"
+            elif "efv_5_jupiter" in riven["item"]["weapon_url_name"]: 
+                weap_name = "efv-5_jupiter"
+            else:
+                weap_name = riven["item"]["weapon_url_name"]
+            if riven["buyout_price"] == None:
+                price = riven["starting_price"]
+            else:
+                price = riven["buyout_price"]
+            stats = {}
+            count = 0
+            for stat in riven["item"]["attributes"]:
+                if stat["positive"] == True:
+                    stats.update({f"pos{count}_stats":stat['url_name'],f"pos{count}_vals":stat['value']})
+                    positive_stats.append(stat['url_name'])
+                    positive_vals.append(stat['value'])
+                    count += 1
+                elif stat["positive"] == False:
+                    negative_stats.append(stat['url_name'])
+                    negative_vals.append(stat['value'])
+            try:
+                rivens.update({riven["id"]:{"weapon":weap_name,"riven_name":riv_name,"rerolls":rolls,"mastery":mr,"polarity":pol,"price":price,"pos_stats":stats,"neg_stat":negative_stats[0],"neg_val":negative_vals[0]}})
+            except:
+                rivens.update({riven["id"]:{"weapon":weap_name,"riven_name":riv_name,"rerolls":rolls,"mastery":mr,"polarity":pol,"price":price,"pos_stats":stats,"neg_stat":negative_stats,"neg_val":negative_vals}})
     return rivens
